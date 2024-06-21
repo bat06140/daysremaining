@@ -8,24 +8,22 @@ import tw from "twin.macro";
 const Calendar = () => {
   const gridRef = useRef<HTMLDivElement>(null);
   const calendarRef = useRef<HTMLDivElement>(null);
-  useWindowSize(() => {
-    adjustAspectRatio();
-  });
-  useEffect(() => {
-    adjustAspectRatio();
-  });
-
-  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
-  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
-
-  const daysOfWeek = ["LUN", "MAR", "MER", "JEU", "VEN", "SAM", "DIM"];
+  // useWindowSize(() => {
+  //   adjustAspectRatio();
+  // });
+  // useEffect(() => {
+  //   adjustAspectRatio();
+  // });
   function adjustAspectRatio() {
     console.log("Adjust ratio");
     if (calendarRef.current) {
       const aspectRatio = 0.9; // Example aspect ratio, change as needed
-      const windowWidth = window.innerWidth;
-      const windowHeight = window.innerHeight;
+      const windowWidth = calendarRef.current.parentElement!.offsetWidth;
+      const windowHeight = calendarRef.current.parentElement!.offsetHeight;
       const windowRatio = windowWidth / windowHeight;
+
+      console.log("win width", windowWidth);
+      console.log("win height", windowHeight);
 
       if (windowRatio > aspectRatio) {
         // Window is wider than the desired aspect ratio
@@ -38,6 +36,30 @@ const Calendar = () => {
       }
     }
   }
+  adjustAspectRatio();
+  useEffect(() => {
+    const component = calendarRef.current;
+
+    const observer = new ResizeObserver(() => {
+      adjustAspectRatio();
+    });
+
+    if (component) {
+      observer.observe(component);
+    }
+
+    // Cleanup observer on component unmount
+    return () => {
+      if (component) {
+        observer.unobserve(component);
+      }
+    };
+  }, [calendarRef]);
+
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+
+  const daysOfWeek = ["LUN", "MAR", "MER", "JEU", "VEN", "SAM", "DIM"];
 
   function generateCalendar(month: number, year: number) {
     console.log("generateCalendar", month, year);
@@ -105,13 +127,12 @@ const Calendar = () => {
         generateCalendar={generateCalendar}
         changeMonth={changeMonth}
       />
-
       <div
         ref={gridRef}
         css={css`
           grid-template-rows: repeat(7, minmax(0, 1fr));
         `}
-        className="flex-grow-7 grid w-full h-85p grid-cols-7 p-2 box-border"
+        className="border border-notion-light-gray-border  flex-grow-7 grid w-full h-4/5 grid-cols-7 p-1 rounded-b box-border"
       >
         {daysOfWeek.map((day, index) => (
           <Day key={index}>{day}</Day>

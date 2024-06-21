@@ -71,14 +71,14 @@ const CalendarHeader = ({
   console.log("currentMonth", currentMonth, "months[currentMonth]", months[currentMonth]);
   return (
     <>
-      <div css={tw`flex justify-between items-center bg-notion-black text-white h-15p rounded-t`}>
-        <AutosizeButton overrideTw={tw`h-full aspect-square inline-flex items-center`} onClick={() => changeMonth(-1)}>
+      <div css={tw`flex justify-between items-center bg-notion-black text-white h-1/5 rounded-t`}>
+        <AutosizeButton overrideTw={tw`h-full aspect-1/2 inline-flex items-center`} onClick={() => changeMonth(-1)}>
           {"<"}
         </AutosizeButton>
         <AutosizeText overrideTw={tw`h-full inline-flex items-center`} onClick={openMonthYearDialog}>
           {`${months[currentMonth]} ${currentYear}`}
         </AutosizeText>
-        <AutosizeButton overrideTw={tw`h-full aspect-square inline-flex items-center`} onClick={() => changeMonth(1)}>
+        <AutosizeButton overrideTw={tw`h-full aspect-1/2 inline-flex items-center`} onClick={() => changeMonth(1)}>
           {">"}
         </AutosizeButton>
       </div>

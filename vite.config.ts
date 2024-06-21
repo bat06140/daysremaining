@@ -1,7 +1,8 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import macros from "vite-plugin-babel-macros";
-import { viteSingleFile } from "vite-plugin-singlefile"
+import { viteSingleFile } from "vite-plugin-singlefile";
+import path from "path";
 
 export default defineConfig({
   plugins: [
@@ -12,6 +13,11 @@ export default defineConfig({
       },
     }),
     macros(),
-    viteSingleFile()
+    viteSingleFile(),
   ],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
 });

@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { formatDate, parseDate } from "./utils";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import Calendar from "./Calendar";
+import tw from "twin.macro";
 
 export const DaysRemaining = () => {
   const [showDateInput, setShowDateInput] = useState(false);
@@ -54,17 +57,16 @@ export const DaysRemaining = () => {
   }, [showDateInput]);
   return (
     <div className="flex flex-col items-center p-6 rounded-lg shadow-lg bg-gray-100">
-      <div className="cursor-pointer p-2 text-lg border rounded bg-white" onClick={onClick}>
-        {targetDate ? `J-${daysRemaining}` : "Choisir une date"}
-      </div>
-
-      <input
-        type="date"
-        value={targetDate ? formatDate(targetDate) : ""}
-        onChange={handleChange}
-        ref={inputRef}
-        className={`${showDateInput ? "block" : "hidden"}`}
-      />
+      <Popover>
+        <PopoverTrigger asChild>
+          <div className="cursor-pointer p-2 text-lg border rounded bg-white" onClick={onClick}>
+            {targetDate ? `J-${daysRemaining}` : "Choisir une date"}
+          </div>
+        </PopoverTrigger>
+        <PopoverContent>
+          <Calendar />
+        </PopoverContent>
+      </Popover>
     </div>
   );
 };

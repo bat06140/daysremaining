@@ -2,12 +2,14 @@ import { useRef } from "react";
 
 import tw from "twin.macro";
 import Calendar from "./Calendar";
+import { DaysRemaining } from "./DaysRemaining";
 
-function  App() {
+function App() {
   const parentRef = useRef<HTMLDivElement>(null);
   return (
-    <div ref={parentRef} css={tw`w-full h-full`}>
-      <Calendar />
+    <div ref={parentRef} css={tw`h-screen`}>
+      <DaysRemaining />
+      {/* <Calendar /> */}
     </div>
   );
 }
