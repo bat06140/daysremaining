@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import tw from "twin.macro";
 import Calendar from "./components/Calendar";
 import { DaysRemaining } from "./components/DaysRemaining";
 import FlipClock from "./components/FlipClock";
@@ -24,7 +23,7 @@ function App() {
   return (
     <div
       ref={parentRef}
-      css={tw`w-screen h-screen flex items-center justify-center`}
+      className="w-screen h-screen flex items-center justify-center"
     >
       {isClient ? <Component /> : "Loading..."}
     </div>

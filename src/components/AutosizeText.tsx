@@ -1,9 +1,11 @@
 import { forwardRef, useEffect, useRef, useState } from "react";
-import tw, { TwStyle } from "twin.macro";
-import { SerializedStyles, css } from "@emotion/react";
+import { css, SerializedStyles } from "@emotion/react";
+import { ClassNameValue } from "tailwind-merge";
+import { cn } from "@/lib/utils";
+import { ClassValue } from "clsx";
 
 export interface AutosizeTextProps {
-  overrideTw?: TwStyle;
+  overrideTw?: ClassValue;
   overrideCss?: SerializedStyles;
   heightRatio?: number;
   onClick?: React.MouseEventHandler<HTMLElement>;
@@ -12,7 +14,7 @@ export interface AutosizeTextProps {
 export const AutosizeText = forwardRef<HTMLParagraphElement, AutosizeTextProps>(
   (props, ref) => {
     const {
-      overrideTw = {},
+      overrideTw,
       overrideCss,
       heightRatio = 0.5,
       onClick,
@@ -78,16 +80,14 @@ export const AutosizeText = forwardRef<HTMLParagraphElement, AutosizeTextProps>(
             ref.current = node;
           }
         }}
-        css={[
-          {
-            ...tw`h-full flex justify-center items-center overflow-hidden whitespace-nowrap`,
-            ...overrideTw,
-          },
-          css`
-            font-size: ${fontSize}px;
-            ${overrideCss}
-          `,
-        ]}
+        className={cn(
+          "h-full flex justify-center items-center overflow-hidden whitespace-nowrap",
+          overrideTw
+        )}
+        css={css`
+          font-size: ${fontSize}px;
+          ${overrideCss}
+        `}
         onClick={onClick}
       >
         {children}

@@ -90,10 +90,10 @@ const FlipClock = () => {
 
   return (
     <div
-      className="flex flex-col w-screen h-screen text-white rounded"
+      className="flex flex-col w-screen h-screen text-white rounded-sm"
       ref={clockRef}
     >
-      <div className="h-7/10 gap-[2px] flex justify-center rounded">
+      <div className="h-7/10 gap-[2px] flex justify-center rounded-sm">
         <FlipNumber number={hours} fontSize={timeFontSize} />
         <FlipNumber number={minutes} fontSize={timeFontSize} />
       </div>

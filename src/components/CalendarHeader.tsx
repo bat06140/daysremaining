@@ -1,5 +1,4 @@
 import { useRef } from "react";
-import tw from "twin.macro";
 import { AutosizeButton } from "./AutosizeButton";
 import { AutosizeText } from "./AutosizeText";
 const CalendarHeader = ({
@@ -77,22 +76,22 @@ const CalendarHeader = ({
   return (
     <>
       <div
-        css={tw`w-full flex justify-between items-center bg-notion-black text-white h-1/5 rounded mb-[2px]`}
+        className={`w-full flex justify-between items-center bg-notion-black text-white h-1/5 rounded-sm mb-[2px]`}
       >
         <AutosizeButton
-          overrideTw={tw`h-full aspect-1/2 inline-flex items-center`}
+          overrideTw={`h-full aspect-1/2 inline-flex items-center`}
           onClick={() => changeMonth(-1)}
         >
           {"<"}
         </AutosizeButton>
         <AutosizeText
-          overrideTw={tw`h-full inline-flex items-center`}
+          overrideTw={`h-full inline-flex items-center`}
           onClick={openMonthYearDialog}
         >
           {`${months[currentMonth]} ${currentYear}`}
         </AutosizeText>
         <AutosizeButton
-          overrideTw={tw`h-full aspect-1/2 inline-flex items-center`}
+          overrideTw={`h-full aspect-1/2 inline-flex items-center`}
           onClick={() => changeMonth(1)}
         >
           {">"}

@@ -2,7 +2,6 @@ import { useRef, useState } from "react";
 import CalendarHeader from "./CalendarHeader";
 import { Day } from "./Day";
 import { css } from "@emotion/react";
-import tw from "twin.macro";
 import { SquareContainer } from "./SquareContainer";
 
 const Calendar = ({
@@ -103,7 +102,7 @@ const Calendar = ({
         css={css`
           grid-template-rows: repeat(7, minmax(0, 1fr));
         `}
-        className="border border-notion-light-gray-border flex-grow-7 grid w-full h-4/5 grid-cols-7 p-1 rounded box-border"
+        className="border border-notion-light-gray-border flex-grow-7 grid w-full h-4/5 grid-cols-7 p-1 rounded-sm box-border"
       >
         {daysOfWeek.map((day, index) => (
           <Day key={index}>{day}</Day>
@@ -149,10 +148,7 @@ const Calendar = ({
         ))}
       </div>
       {showCopyright && (
-        <div
-          css={tw`flex w-full h-12 mt-[2px] flex-col bg-black text-white rounded-[4px] justify-center items-center font-mono text-xl
-`}
-        >
+        <div className="flex w-full h-12 mt-[2px] flex-col bg-black text-white rounded-[4px] justify-center items-center font-mono text-xl">
           <a href="https://atomicskills.academy">© Atomic Skills Academy</a>
         </div>
       )}

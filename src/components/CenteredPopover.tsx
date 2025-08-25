@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from "react";
 import { AutosizeText } from "./AutosizeText";
-import tw from "twin.macro";
 import ClickIcon from "../click.svg";
 import { SquareContainer } from "./SquareContainer";
 
@@ -80,11 +79,11 @@ export const CenteredPopover = ({
   return (
     <SquareContainer
       ref={containerRef}
-      className="w-full h-full rounded bg-notion-black relative"
+      className="w-full h-full rounded-sm bg-notion-black relative"
       onClick={onPopTrigger}
     >
       <AutosizeText
-        overrideTw={tw`text-white`}
+        overrideTw={`text-white`}
         ref={refAutoSizeText}
         heightRatio={0.7}
       >
@@ -97,7 +96,7 @@ export const CenteredPopover = ({
 
       {showPop && (
         <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4/5 h-4/5 bg-white border border-gray-300 rounded shadow-lg flex items-center justify-center z-10"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4/5 h-4/5 bg-white border border-gray-300 rounded-sm shadow-lg flex items-center justify-center z-10"
           ref={refPopover}
         >
           {children}

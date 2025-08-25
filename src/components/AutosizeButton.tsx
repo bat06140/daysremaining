@@ -1,16 +1,17 @@
 import { MouseEventHandler, useRef, useState } from "react";
-import tw, { TwStyle } from "twin.macro";
-import { SerializedStyles, css } from "@emotion/react";
+import { SerializedStyles } from "@emotion/react";
 import useResizeObserver from "../hook/useResizeObserver";
+import { ClassNameValue } from "tailwind-merge";
+import { cn } from "@/lib/utils";
 
 export const AutosizeButton = ({
-  overrideTw = {},
+  overrideTw,
   overrideCss,
   heightRatio = 0.5,
   onClick,
   children,
 }: {
-  overrideTw?: TwStyle;
+  overrideTw?: ClassNameValue;
   overrideCss?: SerializedStyles;
   heightRatio?: number;
   onClick?: MouseEventHandler;
@@ -32,16 +33,14 @@ export const AutosizeButton = ({
   return (
     <button
       ref={ref}
-      css={[
-        {
-          ...tw`p-0 flex justify-center items-center text-white bg-transparent`,
-          ...overrideTw,
-        },
-        css`
-          font-size: ${fontSize}px;
-          ${overrideCss}
-        `,
-      ]}
+      className={cn(
+        "p-0 flex justify-center items-center text-white bg-transparent",
+        overrideTw
+      )}
+      style={{
+        fontSize: `${fontSize}px`,
+        ...overrideCss,
+      }}
       onClick={onClick}
     >
       {children}
