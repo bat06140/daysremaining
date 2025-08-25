@@ -1,7 +1,7 @@
 import { MouseEventHandler, useRef, useState } from "react";
 import tw, { TwStyle } from "twin.macro";
 import { SerializedStyles, css } from "@emotion/react";
-import useResizeObserver from "./hook/useResizeObserver";
+import useResizeObserver from "../hook/useResizeObserver";
 
 export const AutosizeButton = ({
   overrideTw = {},
@@ -21,7 +21,10 @@ export const AutosizeButton = ({
 
   useResizeObserver(ref, () => {
     if (ref.current) {
-      console.log("Autosize text useResizeObserver", ref.current.clientHeight * heightRatio);
+      console.log(
+        "Autosize text useResizeObserver",
+        ref.current.clientHeight * heightRatio
+      );
       setFontSize(ref.current.clientHeight * heightRatio);
     }
   });

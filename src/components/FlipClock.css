@@ -1,0 +1,41 @@
+.flip-clock {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  color: white;
+  font-family: Arial, sans-serif;
+  gap: 2px;
+  border-radius: 4px;
+}
+
+.time-section {
+  height: 70%;
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+  border-radius: 4px;
+}
+
+.date-section {
+  height: 30%;
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+  border-radius: 4px;
+}
+
+.flip-number,
+.flip-date {
+  background-color: #2a2a2a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-weight: bold;
+  position: relative;
+  width: auto;
+  flex: 1;
+  border-radius: 4px;
+  line-height: 1;
+}

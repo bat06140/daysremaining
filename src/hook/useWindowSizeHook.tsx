@@ -7,6 +7,7 @@ export function useWindowSize(callback?: () => void) {
   });
 
   useEffect(() => {
+    callback?.();
     function handleResize() {
       setWindowSize({
         width: window.innerWidth,

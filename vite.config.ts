@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 import macros from "vite-plugin-babel-macros";
 import { viteSingleFile } from "vite-plugin-singlefile";
 import path from "path";
+import svgr from "vite-plugin-svgr";
 
 export default defineConfig({
   plugins: [
@@ -14,6 +15,9 @@ export default defineConfig({
     }),
     macros(),
     viteSingleFile(),
+    svgr({
+      include: "**/*.svg",
+    }),
   ],
   resolve: {
     alias: {

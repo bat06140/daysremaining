@@ -1,7 +1,12 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ["class"],
-  content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
+  content: [
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+  ],
   prefix: "",
   theme: {
     container: {
@@ -13,6 +18,7 @@ module.exports = {
     },
     extend: {
       height: {
+        "03p": "0.3%",
         "15p": "15%",
         "85p": "85%",
       },
@@ -22,6 +28,7 @@ module.exports = {
       },
       fontFamily: {
         sans: ["Bebas Neue", "sans-serif"],
+        mono: ["Roboto", "sans-serif"],
       },
       aspectRatio: {
         "1/2": "1 / 2",
@@ -39,6 +46,10 @@ module.exports = {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+      },
+      zIndex: {
+        1: "1",
+        2: "2",
       },
     },
   },
