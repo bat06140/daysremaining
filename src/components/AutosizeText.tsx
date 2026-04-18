@@ -1,8 +1,8 @@
-import { forwardRef, useEffect, useRef, useState } from "react";
+import { forwardRef, useRef } from "react";
 import { css, SerializedStyles } from "@emotion/react";
-import { ClassNameValue } from "tailwind-merge";
 import { cn } from "@/lib/utils";
 import { ClassValue } from "clsx";
+import { useAutoFitFontSize } from "@/hook/useAutoFitFontSize";
 
 export interface AutosizeTextProps {
   overrideTw?: ClassValue;
@@ -20,55 +20,12 @@ export const AutosizeText = forwardRef<HTMLParagraphElement, AutosizeTextProps>(
       onClick,
       children,
     } = props;
-    const [fontSize, setFontSize] = useState(0);
     const pRef = useRef<HTMLParagraphElement | null>(null);
 
-    useEffect(() => {
-      const component = pRef.current;
-      if (!component) {
-        return;
-      }
-
-      let isAdjusting = false;
-      const adjustFontSize = () => {
-        if (!component || isAdjusting) {
-          return;
-        }
-
-        isAdjusting = true;
-        const height =
-          component.parentElement?.clientHeight || component.clientHeight;
-        const width =
-          component.parentElement?.clientWidth || component.clientWidth;
-        if (height === 0 || width === 0) {
-          isAdjusting = false;
-          return;
-        }
-
-        // Start with a reasonable initial size
-        const initialSize = height * heightRatio;
-        if (initialSize > 0) {
-          setFontSize(initialSize);
-        }
-        isAdjusting = false;
-      };
-
-      // Initial adjustment
-      adjustFontSize();
-
-      const observer = new ResizeObserver(() => {
-        if (!isAdjusting) {
-          adjustFontSize();
-        }
-      });
-
-      observer.observe(component);
-
-      // Cleanup observer on component unmount
-      return () => {
-        observer.unobserve(component);
-      };
-    }, [ref, heightRatio]);
+    useAutoFitFontSize(pRef, {
+      maxHeightRatio: heightRatio,
+      watch: children,
+    });
 
     return (
       <p
@@ -81,11 +38,10 @@ export const AutosizeText = forwardRef<HTMLParagraphElement, AutosizeTextProps>(
           }
         }}
         className={cn(
-          "h-full flex justify-center items-center overflow-hidden whitespace-nowrap",
+          "flex h-full w-full items-center justify-center overflow-hidden whitespace-nowrap leading-none",
           overrideTw
         )}
         css={css`
-          font-size: ${fontSize}px;
           ${overrideCss}
         `}
         onClick={onClick}

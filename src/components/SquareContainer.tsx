@@ -1,15 +1,18 @@
 import React, { useEffect, useRef } from "react";
+import { cn } from "@/lib/utils";
+import { WidgetLayout } from "@/lib/view-config";
 
 interface SquareContainerProps {
   className?: string;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
   children: React.ReactNode;
+  layout?: WidgetLayout;
 }
 
 export const SquareContainer = React.forwardRef<
   HTMLDivElement,
   SquareContainerProps
->(({ className = "", onClick, children }, forwardedRef) => {
+>(({ className = "", onClick, children, layout = "square" }, forwardedRef) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Sync the forwarded ref with our local ref
@@ -18,8 +21,15 @@ export const SquareContainer = React.forwardRef<
   useEffect(() => {
     if (!containerRef.current) return;
 
+    const container = containerRef.current;
+
+    if (layout === "full") {
+      container.style.width = "100%";
+      container.style.height = "100%";
+      return;
+    }
+
     const adjustSize = () => {
-      const container = containerRef.current;
       if (!container) return;
 
       // First, ensure the container takes up available space but maintains aspect ratio
@@ -34,6 +44,7 @@ export const SquareContainer = React.forwardRef<
 
       // Set both width and padding-bottom to maintain aspect ratio
       container.style.width = `${size}px`;
+      container.style.height = `${size}px`;
     };
 
     // Initial adjustment
@@ -49,12 +60,16 @@ export const SquareContainer = React.forwardRef<
     return () => {
       resizeObserver.disconnect();
     };
-  }, []);
+  }, [layout]);
 
   return (
     <div
       ref={containerRef}
-      className={`flex flex-col items-center justify-center aspect-square ${className}`}
+      className={cn(
+        "flex min-h-0 min-w-0 flex-col items-center justify-center",
+        layout === "square" ? "aspect-square" : "h-full w-full",
+        className
+      )}
       style={{
         minWidth: 0,
         minHeight: 0,

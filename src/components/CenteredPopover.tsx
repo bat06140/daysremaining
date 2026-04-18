@@ -1,7 +1,10 @@
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { AutosizeText } from "./AutosizeText";
 import ClickIcon from "../click.svg";
 import { SquareContainer } from "./SquareContainer";
+import { cn } from "@/lib/utils";
+import { WidgetLayout } from "@/lib/view-config";
+import { WidgetFooter } from "./WidgetFooter";
 
 type Props = {
   textContent: string;
@@ -10,7 +13,9 @@ type Props = {
   onPopTrigger: (event: React.MouseEvent) => void;
   onClickOutside: () => void;
   children: string | JSX.Element | JSX.Element[];
+  layout?: WidgetLayout;
 };
+
 export const CenteredPopover = ({
   textContent,
   showPop,
@@ -18,59 +23,22 @@ export const CenteredPopover = ({
   onPopTrigger,
   onClickOutside,
   children,
+  layout = "square",
 }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState({ top: 0, left: 0 });
-  const refAutoSizeText = useRef<HTMLParagraphElement>(null);
-  const refPopover = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!containerRef?.current) {
-      return;
-    }
-    const component = containerRef.current;
-
-    const adjustPosition = () => {
-      if (!component) {
-        return;
-      }
-      const rect = component.getBoundingClientRect();
-      setPosition({
-        top: rect.top + rect.height / 2,
-        left: rect.left + rect.width / 2,
-      });
-    };
-
-    // Initial position
-    adjustPosition();
-
-    const observer = new ResizeObserver(adjustPosition);
-    observer.observe(component);
-
-    // Also listen for scroll events since getBoundingClientRect is relative to viewport
-    window.addEventListener("scroll", adjustPosition, true);
-
-    // Cleanup observer on component unmount
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("scroll", adjustPosition, true);
-    };
-  }, [containerRef]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (!event) {
-        return;
-      }
       if (
-        containerRef?.current &&
+        containerRef.current &&
         !containerRef.current.contains(event.target as Node)
       ) {
         onClickOutside();
-        console.log("handleclickoutside");
       }
     };
+
     document.addEventListener("mousedown", handleClickOutside);
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
@@ -79,44 +47,68 @@ export const CenteredPopover = ({
   return (
     <SquareContainer
       ref={containerRef}
-      className="w-full h-full rounded-sm bg-notion-black relative"
-      onClick={onPopTrigger}
+      layout={layout}
+      className="w-full"
     >
-      <AutosizeText
-        overrideTw={`text-white`}
-        ref={refAutoSizeText}
-        heightRatio={0.7}
-      >
-        {textContent}
-      </AutosizeText>
-
-      <div className="absolute bottom-0 right-0 mr-4 mb-4">
-        <ClickIcon fill="white" width="30" height="30" />
-      </div>
-
-      {showPop && (
+      <div className="flex h-full w-full flex-col gap-[2px]">
         <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4/5 h-4/5 bg-white border border-gray-300 rounded-sm shadow-lg flex items-center justify-center z-10"
-          ref={refPopover}
+          className={cn(
+            "relative min-h-0 flex-1 overflow-visible rounded-[8px] bg-notion-black",
+            layout === "full" && "rounded-[8px]"
+          )}
+          onClick={onPopTrigger}
         >
-          {children}
-        </div>
-      )}
-      {showCopyright && (
-        <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center mb-4">
-          <a
-            href="https://atomicskills.academy"
-            className="text-center text-white text-xl"
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
+          <AutosizeText
+            overrideTw="px-6 font-bold tracking-[-0.04em] text-white"
+            heightRatio={layout === "full" ? 0.58 : 0.64}
           >
-            © atomicskills.academy
-          </a>
+            {textContent}
+          </AutosizeText>
+
+          <div className="pointer-events-none absolute bottom-4 right-4 z-10 opacity-90">
+            <ClickIcon
+              fill="white"
+              width={layout === "full" ? "40" : "30"}
+              height={layout === "full" ? "40" : "30"}
+            />
+          </div>
+
+          {showPop && (
+            <div
+              className={cn(
+                "absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2",
+                layout === "full"
+                  ? "h-[82%] w-[88%]"
+                  : "h-4/5 w-4/5"
+              )}
+            >
+              <button
+                type="button"
+                className="absolute right-0 top-0 z-20 flex h-10 w-10 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-notion-black text-2xl leading-none text-white shadow-[0_8px_20px_rgba(0,0,0,0.22)]"
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  onClickOutside();
+                }}
+                aria-label="Close popover"
+              >
+                ×
+              </button>
+              <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-[8px] border border-gray-300 bg-white shadow-lg">
+                {children}
+              </div>
+            </div>
+          )}
         </div>
-      )}
+
+        {showCopyright && (
+          <WidgetFooter
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
+          />
+        )}
+      </div>
     </SquareContainer>
   );
 };

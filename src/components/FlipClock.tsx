@@ -1,111 +1,91 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { AutosizeText } from "./AutosizeText";
 import { SquareContainer } from "./SquareContainer";
-const FlipNumber = ({ number }: { number: number }) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const [containerWidth, setContainerWidth] = useState(0);
-  const [containerHeight, setContainerHeight] = useState(0);
-  useEffect(() => {
-    if (ref?.current) {
-      setContainerWidth(ref.current.offsetWidth);
-      setContainerHeight(ref.current.offsetHeight);
-    }
-  }, [ref?.current]);
+import { cn } from "@/lib/utils";
+import { WidgetLayout } from "@/lib/view-config";
+import { WidgetFooter } from "./WidgetFooter";
+
+const ClockTile = ({
+  text,
+  heightRatio,
+  className,
+}: {
+  text: string;
+  heightRatio: number;
+  className?: string;
+}) => {
   return (
     <div
-      ref={ref}
-      className="bg-[#2a2a2a] flex flex-1 items-center justify-center font-bold relative w-auto  rounded-[4px] leading-none"
-      style={{ fontSize: containerWidth > containerHeight ? `35vh` : `35vw` }}
+      className={cn(
+        "flex min-h-0 min-w-0 flex-1 rounded-[8px] bg-notion-black shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]",
+        className
+      )}
     >
-      {String(number).padStart(2, "0")}
+      <AutosizeText
+        overrideTw="px-2 font-bold tracking-[-0.04em] text-white"
+        heightRatio={heightRatio}
+      >
+        {text}
+      </AutosizeText>
     </div>
   );
 };
 
-const FlipDate = ({ text }: { text: string | number }) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const [containerWidth, setContainerWidth] = useState(0);
-  const [containerHeight, setContainerHeight] = useState(0);
-  useEffect(() => {
-    if (ref?.current) {
-      setContainerWidth(ref.current.offsetWidth);
-      setContainerHeight(ref.current.offsetHeight);
-    }
-  }, [ref?.current]);
-  return (
-    <div
-      ref={ref}
-      className="bg-[#2a2a2a] flex flex-1 items-center justify-center font-bold relative w-auto  rounded-[4px] leading-none"
-      style={{ fontSize: containerWidth > containerHeight ? `15vh` : `15vw` }}
-    >
-      {text}
-    </div>
-  );
-};
-
-const FlipClock = () => {
-  const clockRef = useRef<HTMLDivElement>(null);
-  const [timeFontSize, setTimeFontSize] = React.useState(0);
-  const [dateFontSize, setDateFontSize] = React.useState(0);
+const FlipClock = ({
+  layout = "square",
+  showCopyright = true,
+}: {
+  layout?: WidgetLayout;
+  showCopyright?: boolean;
+}) => {
+  const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
-    const updateFontSize = () => {
-      if (clockRef.current) {
-        const containerHeight = clockRef.current.offsetHeight;
-        const containerWidth = clockRef.current.offsetWidth;
+    const intervalId = window.setInterval(() => {
+      setNow(new Date());
+    }, 1000);
 
-        // Calculate font sizes based on container dimensions
-        // Using the smaller of height-based or width-based calculation
-        const timeHeight = containerHeight * 0.7; // 70% of container height for time section
-        const dateHeight = containerHeight * 0.3; // 30% of container height for date section
-
-        const timeSizeFromHeight = timeHeight * 0.6;
-        const timeSizeFromWidth = containerWidth * 0.6;
-        const newTimeSize = Math.min(timeSizeFromHeight, timeSizeFromWidth);
-
-        const dateSizeFromHeight = dateHeight * 0.6;
-        const dateSizeFromWidth = containerWidth * 0.6;
-        const newDateSize = Math.min(dateSizeFromHeight, dateSizeFromWidth);
-
-        setTimeFontSize(Math.floor(newTimeSize));
-        setDateFontSize(Math.floor(newDateSize));
-      }
+    return () => {
+      window.clearInterval(intervalId);
     };
-
-    // Initial size calculation
-    updateFontSize();
-
-    // Add resize listener
-    window.addEventListener("resize", updateFontSize);
-
-    // Cleanup
-    return () => window.removeEventListener("resize", updateFontSize);
   }, []);
 
-  const date = new Date();
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
-  const day = date.getDate();
-  const month = date
+  const hours = now.getHours();
+  const minutes = now.getMinutes();
+  const day = now.getDate();
+  const month = now
     .toLocaleString("fr-FR", { month: "short" })
     .replace(".", "")
     .toUpperCase();
-  const year = date.getUTCFullYear();
+  const year = now.getFullYear();
 
   return (
-    <SquareContainer>
-      <div
-        className="flex flex-col w-full h-full gap-[2px] text-white rounded-sm"
-        ref={clockRef}
-      >
-        <div className="h-[70%] gap-[2px] flex justify-center rounded-sm">
-          <FlipNumber number={hours} />
-          <FlipNumber number={minutes} />
+    <SquareContainer
+      layout={layout}
+      className={cn(
+        "overflow-hidden rounded-[8px]",
+        layout === "full" && "rounded-[8px] p-1"
+      )}
+    >
+      <div className="flex h-full w-full min-h-0 flex-col gap-[2px] rounded-[8px] text-white">
+        <div className="flex min-h-0 flex-1 flex-col gap-[2px]">
+          <div className="flex min-h-0 flex-[7] gap-[2px]">
+            <ClockTile
+              text={String(hours).padStart(2, "0")}
+              heightRatio={0.8}
+            />
+            <ClockTile
+              text={String(minutes).padStart(2, "0")}
+              heightRatio={0.8}
+            />
+          </div>
+          <div className="flex min-h-0 flex-[3] gap-[2px]">
+            <ClockTile text={String(day)} heightRatio={0.62} />
+            <ClockTile text={month} heightRatio={0.62} />
+            <ClockTile text={String(year)} heightRatio={0.62} />
+          </div>
         </div>
-        <div className="h-[30%] flex justify-center gap-[2px] rounded-[4px]">
-          <FlipDate text={day} />
-          <FlipDate text={month} />
-          <FlipDate text={year} />
-        </div>
+        {showCopyright && <WidgetFooter />}
       </div>
     </SquareContainer>
   );

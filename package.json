@@ -16,6 +16,7 @@
     "build": "tsc && vite build",
     "build:calendar": "VITE_COMPONENT=calendar tsc && vite build",
     "build:days-remaining": "VITE_COMPONENT=daysRemaining tsc && vite build",
+    "test": "tsc -p tests/tsconfig.json && node --test .test-dist/tests/**/*.test.js",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },

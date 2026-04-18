@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { AutosizeButton } from "./AutosizeButton";
 import { AutosizeText } from "./AutosizeText";
+
 const CalendarHeader = ({
   currentMonth,
   currentYear,
@@ -12,7 +13,6 @@ const CalendarHeader = ({
   generateCalendar: (month: number, year: number) => void;
   changeMonth: (month: number) => void;
 }) => {
-  const monthDisplayRef = useRef<HTMLDivElement>(null);
   const monthYearDialogRef = useRef<HTMLDivElement>(null);
   const monthSelectRef = useRef<HTMLSelectElement>(null);
   const yearSelectRef = useRef<HTMLSelectElement>(null);
@@ -55,8 +55,8 @@ const CalendarHeader = ({
     }
 
     // Show the dialog
-    if (monthDisplayRef.current) {
-      monthDisplayRef.current.style.display = "block";
+    if (monthYearDialogRef.current) {
+      monthYearDialogRef.current.style.display = "block";
     }
     if (overlayRef.current) {
       overlayRef.current.style.display = "block";
@@ -64,19 +64,13 @@ const CalendarHeader = ({
   }
   function closeDialog() {
     // Hide the dialog
-    monthDisplayRef.current!.style.display = "none";
+    monthYearDialogRef.current!.style.display = "none";
     overlayRef.current!.style.display = "none";
   }
-  console.log(
-    "currentMonth",
-    currentMonth,
-    "months[currentMonth]",
-    months[currentMonth]
-  );
   return (
     <>
       <div
-        className={`w-full flex justify-between items-center bg-notion-black text-white h-1/5 rounded-sm mb-[2px]`}
+        className={`w-full flex justify-between items-center bg-notion-black text-white h-1/5 rounded-[8px] mb-[2px]`}
       >
         <AutosizeButton
           overrideTw={`h-full aspect-1/2 inline-flex items-center`}

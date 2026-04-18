@@ -1,31 +1,41 @@
-import { useEffect, useRef, useState } from "react";
-import Calendar from "./components/Calendar";
-import { DaysRemaining } from "./components/DaysRemaining";
-import FlipClock from "./components/FlipClock";
-
-const components = {
-  calendar: Calendar,
-  daysRemaining: DaysRemaining,
-  clock: FlipClock,
-};
+import { useEffect, useState } from "react";
+import WidgetShowcase from "./components/WidgetShowcase";
+import { renderWidget } from "./components/widget-registry";
+import { AppView, resolveAppView } from "./lib/view-config";
 
 function App() {
-  const [isClient, setIsClient] = useState(false);
-  const parentRef = useRef<HTMLDivElement>(null);
-
-  const componentName = import.meta.env.VITE_COMPONENT || "calendar";
-  const Component = components[componentName as keyof typeof components];
+  const [view, setView] = useState<AppView | null>(null);
 
   useEffect(() => {
-    setIsClient(true);
+    const updateView = () => {
+      setView(
+        resolveAppView(window.location.search, import.meta.env.VITE_COMPONENT)
+      );
+    };
+
+    updateView();
+    window.addEventListener("popstate", updateView);
+
+    return () => {
+      window.removeEventListener("popstate", updateView);
+    };
   }, []);
+
+  if (!view) {
+    return "Loading...";
+  }
 
   return (
     <div
-      ref={parentRef}
-      className="w-screen h-screen flex items-center justify-center"
+      className={
+        view.kind === "widget" && view.layout === "square"
+          ? "flex h-screen w-screen items-center justify-center bg-[#f3efe7] p-4"
+          : "h-screen w-screen"
+      }
     >
-      {isClient ? <Component /> : "Loading..."}
+      {view.kind === "showcase"
+        ? <WidgetShowcase />
+        : renderWidget(view.widget, view.layout)}
     </div>
   );
 }

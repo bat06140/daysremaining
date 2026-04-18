@@ -3,13 +3,18 @@ import CalendarHeader from "./CalendarHeader";
 import { Day } from "./Day";
 import { css } from "@emotion/react";
 import { SquareContainer } from "./SquareContainer";
+import { cn } from "@/lib/utils";
+import { WidgetLayout } from "@/lib/view-config";
+import { WidgetFooter } from "./WidgetFooter";
 
 const Calendar = ({
   showCopyright = true,
   onDateSelected,
+  layout = "square",
 }: {
   showCopyright?: boolean;
   onDateSelected?: (event: React.MouseEvent, date: Date) => void;
+  layout?: WidgetLayout;
 }) => {
   const gridRef = useRef<HTMLDivElement>(null);
 
@@ -19,7 +24,6 @@ const Calendar = ({
   const daysOfWeek = ["LUN", "MAR", "MER", "JEU", "VEN", "SAM", "DIM"];
 
   function generateCalendar(month: number, year: number) {
-    console.log("generateCalendar", month, year);
     setCurrentMonth(month);
     setCurrentYear(year);
   }
@@ -90,7 +94,13 @@ const Calendar = ({
   );
 
   return (
-    <SquareContainer>
+    <SquareContainer
+      layout={layout}
+      className={cn(
+        "gap-[2px]",
+        layout === "full" && "rounded-[8px] p-1"
+      )}
+    >
       <CalendarHeader
         currentMonth={currentMonth}
         currentYear={currentYear}
@@ -102,7 +112,10 @@ const Calendar = ({
         css={css`
           grid-template-rows: repeat(7, minmax(0, 1fr));
         `}
-        className="border border-notion-light-gray-border flex-grow-7 grid w-full h-4/5 grid-cols-7 p-1 rounded-sm box-border"
+        className={cn(
+          "grid w-full min-h-0 grid-cols-7 rounded-[8px] border border-notion-light-gray-border p-1 box-border",
+          showCopyright ? "flex-[1_1_0]" : "flex-1"
+        )}
       >
         {daysOfWeek.map((day, index) => (
           <Day key={index}>{day}</Day>
@@ -148,9 +161,7 @@ const Calendar = ({
         ))}
       </div>
       {showCopyright && (
-        <div className="flex w-full h-12 mt-[2px] flex-col bg-black text-white rounded-[4px] justify-center items-center font-mono text-xl">
-          <a href="https://atomicskills.academy">© Atomic Skills Academy</a>
-        </div>
+        <WidgetFooter />
       )}
     </SquareContainer>
   );

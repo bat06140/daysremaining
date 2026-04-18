@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "rootDir": "..",
+    "outDir": "../.test-dist"
+  },
+  "include": [
+    "../tests/**/*.ts",
+    "../src/lib/view-config.ts",
+    "../src/lib/showcase-layout.ts",
+    "../src/lib/font-fit.ts"
+  ]
+}
