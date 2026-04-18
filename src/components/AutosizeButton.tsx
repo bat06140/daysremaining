@@ -26,7 +26,7 @@ export const AutosizeButton = ({
     <button
       ref={ref}
       className={cn(
-        "flex items-center justify-center bg-transparent p-0 text-white leading-none",
+        "flex items-center justify-center bg-transparent p-0 text-current leading-none",
         overrideTw
       )}
       style={{

@@ -1,23 +1,104 @@
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { css } from "@emotion/react";
+import { ChevronDown } from "lucide-react";
 import { AutosizeButton } from "./AutosizeButton";
 import { AutosizeText } from "./AutosizeText";
+import { getSharedFittingFontSize } from "@/lib/font-fit";
+import { WidgetTheme } from "@/lib/widget-theme";
+
+type HeaderLabelKey = "month" | "year";
+type HeaderMenuKey = HeaderLabelKey | null;
+
+const HeaderSelectButton = ({
+  label,
+  textColor,
+  isOpen,
+  onClick,
+  fontSize,
+  onFontSizeChange,
+}: {
+  label: string;
+  textColor: string;
+  isOpen: boolean;
+  onClick: () => void;
+  fontSize?: number;
+  onFontSizeChange?: (fontSize: number) => void;
+}) => {
+  return (
+    <button
+      type="button"
+      className="relative flex h-full w-full min-w-0 items-center rounded-[8px] px-1"
+      onClick={onClick}
+    >
+      <div className="pointer-events-none absolute inset-0 pr-6">
+        <AutosizeText
+          wrapperTw="px-1"
+          overrideTw="font-sans font-medium uppercase tracking-[0.08em]"
+          overrideCss={css`
+            color: ${textColor};
+          `}
+          heightRatio={0.74}
+          fontScale={0.93}
+          fontSize={fontSize ?? 22}
+          onFontSizeChange={onFontSizeChange}
+        >
+          {label}
+        </AutosizeText>
+      </div>
+      <ChevronDown
+        size={16}
+        className="pointer-events-none absolute inset-y-0 right-0.5 my-auto transition-transform"
+        style={{
+          color: textColor,
+          transform: `rotate(${isOpen ? 180 : 0}deg)`,
+        }}
+      />
+    </button>
+  );
+};
 
 const CalendarHeader = ({
   currentMonth,
   currentYear,
   generateCalendar,
   changeMonth,
+  theme,
 }: {
   currentMonth: number;
   currentYear: number;
   generateCalendar: (month: number, year: number) => void;
   changeMonth: (month: number) => void;
+  theme: WidgetTheme;
 }) => {
-  const monthYearDialogRef = useRef<HTMLDivElement>(null);
-  const monthSelectRef = useRef<HTMLSelectElement>(null);
-  const yearSelectRef = useRef<HTMLSelectElement>(null);
-  const confirmDateRef = useRef<HTMLButtonElement>(null);
-  const overlayRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [openMenu, setOpenMenu] = useState<HeaderMenuKey>(null);
+  const [measuredSizes, setMeasuredSizes] = useState<
+    Record<HeaderLabelKey, number | undefined>
+  >({
+    month: undefined,
+    year: undefined,
+  });
+
+  useEffect(() => {
+    if (!openMenu) {
+      return;
+    }
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setOpenMenu(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [openMenu]);
 
   const months = [
     "Janvier",
@@ -33,89 +114,142 @@ const CalendarHeader = ({
     "Novembre",
     "Décembre",
   ];
+  const years = Array.from(
+    { length: 21 },
+    (_, index) => currentYear - 10 + index
+  );
+  const textColor = theme.color2;
+  const monthLabel = months[currentMonth];
+  const yearLabel = currentYear.toString();
+  const sharedFontSize = getSharedFittingFontSize([
+    measuredSizes.month,
+    measuredSizes.year,
+  ]);
 
-  function openMonthYearDialog() {
-    // Populate year dropdown if it's not already populated
-    const yearSelect = yearSelectRef.current;
-    if (yearSelect?.length === 0) {
-      for (let i = currentYear - 10; i <= currentYear + 10; i++) {
-        const option = new Option(i.toString(), i.toString());
-        yearSelect.appendChild(option);
-      }
-    }
-    const monthSelect = monthSelectRef.current;
-    if (monthSelect?.length === 0 && yearSelect) {
-      for (let i = 0; i < months.length; i++) {
-        const option = new Option(months[i], i.toString());
-        monthSelect.appendChild(option);
-      }
-      // Set current month and year as selected
-      monthSelect.value = currentMonth.toString();
-      yearSelect.value = currentYear.toString();
-    }
+  const updateMeasuredSize = (key: HeaderLabelKey, fontSize: number) => {
+    setMeasuredSizes((current) =>
+      current[key] === fontSize ? current : { ...current, [key]: fontSize }
+    );
+  };
 
-    // Show the dialog
-    if (monthYearDialogRef.current) {
-      monthYearDialogRef.current.style.display = "block";
-    }
-    if (overlayRef.current) {
-      overlayRef.current.style.display = "block";
-    }
-  }
-  function closeDialog() {
-    // Hide the dialog
-    monthYearDialogRef.current!.style.display = "none";
-    overlayRef.current!.style.display = "none";
-  }
   return (
-    <>
-      <div
-        className={`w-full flex justify-between items-center bg-notion-black text-white h-1/5 rounded-[8px]`}
+    <div
+      ref={containerRef}
+      className="relative flex h-1/5 w-full items-center justify-between rounded-[8px] px-3"
+      style={{
+        backgroundColor: theme.color1,
+        color: textColor,
+      }}
+    >
+      <AutosizeButton
+        overrideTw="h-full aspect-1/2 inline-flex items-center text-current"
+        overrideCss={{ color: textColor }}
+        onClick={() => changeMonth(-1)}
       >
-        <AutosizeButton
-          overrideTw={`h-full aspect-1/2 inline-flex items-center`}
-          onClick={() => changeMonth(-1)}
-        >
-          {"<"}
-        </AutosizeButton>
-        <AutosizeText
-          overrideTw={`h-full inline-flex items-center`}
-          onClick={openMonthYearDialog}
-        >
-          {`${months[currentMonth]} ${currentYear}`}
-        </AutosizeText>
-        <AutosizeButton
-          overrideTw={`h-full aspect-1/2 inline-flex items-center`}
-          onClick={() => changeMonth(1)}
-        >
-          {">"}
-        </AutosizeButton>
-      </div>
-      <div
-        ref={monthYearDialogRef}
-        className="dialog"
-        style={{ display: "none" }}
-      >
-        <div className="dialog-content">
-          <div>
-            <select ref={monthSelectRef}></select>
-            <select ref={yearSelectRef}></select>
-          </div>
-          <button
-            ref={confirmDateRef}
-            onClick={() =>
-              generateCalendar(
-                parseInt(monthSelectRef.current!.value),
-                parseInt(yearSelectRef.current!.value)
-              )
+        {"<"}
+      </AutosizeButton>
+
+      <div className="flex h-full min-w-0 flex-1 items-center justify-center gap-2 px-2">
+        <div className="relative flex h-full min-w-0 flex-[1.2] items-center">
+          <HeaderSelectButton
+            label={monthLabel}
+            textColor={textColor}
+            isOpen={openMenu === "month"}
+            fontSize={sharedFontSize}
+            onFontSizeChange={(fontSize) =>
+              updateMeasuredSize("month", fontSize)
             }
-          >
-            Valider
-          </button>
+            onClick={() =>
+              setOpenMenu((current) => (current === "month" ? null : "month"))
+            }
+          />
+          {openMenu === "month" && (
+            <div
+              className="absolute left-0 top-full z-30 mt-[2px] max-h-56 w-full overflow-y-auto rounded-[8px] border shadow-[0_12px_30px_rgba(0,0,0,0.18)]"
+              style={{
+                backgroundColor: theme.color2,
+                borderColor: theme.color1,
+              }}
+            >
+              {months.map((month, index) => (
+                <button
+                  key={month}
+                  type="button"
+                  className="w-full px-3 py-2 text-left font-sans text-sm uppercase"
+                  style={{
+                    color: theme.color1,
+                    backgroundColor:
+                      index === currentMonth ? theme.color1 : theme.color2,
+                    WebkitTextFillColor:
+                      index === currentMonth ? theme.color2 : theme.color1,
+                  }}
+                  onClick={() => {
+                    generateCalendar(index, currentYear);
+                    setOpenMenu(null);
+                  }}
+                >
+                  {month}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="relative flex h-full min-w-0 flex-[0.8] items-center">
+          <HeaderSelectButton
+            label={yearLabel}
+            textColor={textColor}
+            isOpen={openMenu === "year"}
+            fontSize={sharedFontSize}
+            onFontSizeChange={(fontSize) =>
+              updateMeasuredSize("year", fontSize)
+            }
+            onClick={() =>
+              setOpenMenu((current) => (current === "year" ? null : "year"))
+            }
+          />
+          {openMenu === "year" && (
+            <div
+              className="absolute left-0 top-full z-30 mt-[2px] max-h-56 w-full overflow-y-auto rounded-[8px] border shadow-[0_12px_30px_rgba(0,0,0,0.18)]"
+              style={{
+                backgroundColor: theme.color2,
+                borderColor: theme.color1,
+              }}
+            >
+              {years.map((year) => (
+                <button
+                  key={year}
+                  type="button"
+                  className="w-full px-3 py-2 text-left font-sans text-sm uppercase"
+                  style={{
+                    color: theme.color1,
+                    backgroundColor:
+                      year === currentYear ? theme.color1 : theme.color2,
+                    WebkitTextFillColor:
+                      year === currentYear ? theme.color2 : theme.color1,
+                  }}
+                  onClick={() => {
+                    generateCalendar(currentMonth, year);
+                    setOpenMenu(null);
+                  }}
+                >
+                  {year}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
-      <div ref={overlayRef} className="overlay" onClick={closeDialog}></div>
-    </>
+
+      <AutosizeButton
+        overrideTw="h-full aspect-1/2 inline-flex items-center text-current"
+        overrideCss={{ color: textColor }}
+        onClick={() => changeMonth(1)}
+      >
+        {">"}
+      </AutosizeButton>
+    </div>
   );
 };
+
 export default CalendarHeader;

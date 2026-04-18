@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import WidgetShowcase from "./components/WidgetShowcase";
 import { renderWidget } from "./components/widget-registry";
+import { WidgetThemeProvider } from "./context/WidgetThemeContext";
 import { AppView, resolveAppView } from "./lib/view-config";
 
 function App() {
@@ -26,17 +27,23 @@ function App() {
   }
 
   return (
-    <div
-      className={
-        view.kind === "widget" && view.layout === "square"
-          ? "flex h-screen w-screen items-center justify-center bg-[#f3efe7] p-4"
-          : "h-screen w-screen"
-      }
-    >
-      {view.kind === "showcase"
-        ? <WidgetShowcase />
-        : renderWidget(view.widget, view.layout)}
-    </div>
+    <WidgetThemeProvider>
+      <div
+        className={
+          view.kind === "widget" && view.layout === "square"
+            ? "flex h-screen w-screen items-center justify-center bg-[#f3efe7] p-4"
+            : "h-screen w-screen"
+        }
+      >
+        {view.kind === "showcase"
+          ? <WidgetShowcase hasLicense={view.hasLicense} />
+          : renderWidget({
+              widget: view.widget,
+              layout: view.layout,
+              hasLicense: view.hasLicense,
+            })}
+      </div>
+    </WidgetThemeProvider>
   );
 }
 

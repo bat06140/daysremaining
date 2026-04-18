@@ -7,6 +7,7 @@ test("resolveAppView uses the selected widget with square layout by default", ()
     kind: "widget",
     widget: "clock",
     layout: "square",
+    hasLicense: false,
   });
 });
 
@@ -15,12 +16,14 @@ test("resolveAppView supports full-page widget mode", () => {
     kind: "widget",
     widget: "daysRemaining",
     layout: "full",
+    hasLicense: false,
   });
 });
 
 test("resolveAppView renders the showcase view when requested", () => {
   assert.deepEqual(resolveAppView("?view=showcase&widget=clock", "calendar"), {
     kind: "showcase",
+    hasLicense: false,
   });
 });
 
@@ -29,6 +32,7 @@ test("resolveAppView falls back to the env widget when the url does not specify 
     kind: "widget",
     widget: "daysRemaining",
     layout: "square",
+    hasLicense: false,
   });
 });
 
@@ -37,5 +41,15 @@ test("resolveAppView falls back to calendar for unknown widget and layout values
     kind: "widget",
     widget: "calendar",
     layout: "square",
+    hasLicense: false,
+  });
+});
+
+test("resolveAppView enables licensed mode from query params", () => {
+  assert.deepEqual(resolveAppView("?widget=calendar&hasLicense=true"), {
+    kind: "widget",
+    widget: "calendar",
+    layout: "square",
+    hasLicense: true,
   });
 });

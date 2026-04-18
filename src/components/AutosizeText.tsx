@@ -1,4 +1,4 @@
-import { forwardRef, useRef } from "react";
+import { CSSProperties, forwardRef, useRef } from "react";
 import { css, SerializedStyles } from "@emotion/react";
 import { cn } from "@/lib/utils";
 import { ClassValue } from "clsx";
@@ -6,6 +6,7 @@ import { useAutoFitFontSize } from "@/hook/useAutoFitFontSize";
 
 export interface AutosizeTextProps {
   wrapperTw?: ClassValue;
+  wrapperStyle?: CSSProperties;
   overrideTw?: ClassValue;
   overrideCss?: SerializedStyles;
   heightRatio?: number;
@@ -19,6 +20,7 @@ export const AutosizeText = forwardRef<HTMLParagraphElement, AutosizeTextProps>(
   (props, ref) => {
     const {
       wrapperTw,
+      wrapperStyle,
       overrideTw,
       overrideCss,
       heightRatio = 0.5,
@@ -50,6 +52,7 @@ export const AutosizeText = forwardRef<HTMLParagraphElement, AutosizeTextProps>(
           "grid h-full w-full place-items-center overflow-hidden",
           wrapperTw
         )}
+        style={wrapperStyle}
         onClick={onClick}
       >
         <span

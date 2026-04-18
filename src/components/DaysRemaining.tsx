@@ -3,13 +3,21 @@ import "../index.css";
 import { CenteredPopover } from "./CenteredPopover";
 import Calendar from "./Calendar";
 import { WidgetLayout } from "@/lib/view-config";
+import {
+  formatDaysRemainingLabel,
+  getDaysRemainingFontScale,
+} from "@/lib/days-remaining";
 
 export const DaysRemaining = ({
   layout = "square",
-  showCopyright = true,
+  hasLicense = false,
+  allowThemeEditor = true,
+  showBranding,
 }: {
   layout?: WidgetLayout;
-  showCopyright?: boolean;
+  hasLicense?: boolean;
+  allowThemeEditor?: boolean;
+  showBranding?: boolean;
 }) => {
   const [showPop, setShowPop] = useState(false);
   const [targetDate, setTargetDate] = useState<Date>();
@@ -66,16 +74,17 @@ export const DaysRemaining = ({
     }
   }, []);
 
+  const label = formatDaysRemainingLabel(daysRemaining);
+
   return (
     <CenteredPopover
-      textContent={
-        daysRemaining != undefined && daysRemaining >= 0
-          ? `J-${daysRemaining}`
-          : "J-?"
-      }
+      textContent={label}
+      textFontScale={getDaysRemainingFontScale(label)}
       showPop={showPop}
       layout={layout}
-      showCopyright={showCopyright}
+      hasLicense={hasLicense}
+      allowThemeEditor={allowThemeEditor}
+      showBranding={showBranding}
       onPopTrigger={(event: React.MouseEvent) => {
         event.preventDefault();
         if (!showPop) {
@@ -86,7 +95,9 @@ export const DaysRemaining = ({
     >
       <Calendar
         layout="full"
-        showCopyright={false}
+        hasLicense={hasLicense}
+        allowThemeEditor={false}
+        showBranding={false}
         onDateSelected={onDateSelected}
       />
     </CenteredPopover>

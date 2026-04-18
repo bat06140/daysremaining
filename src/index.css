@@ -101,4 +101,31 @@ layer(base);
   .showcase-handle:hover::before {
     background: rgba(55, 53, 47, 0.26);
   }
+
+  .widget-color-picker .react-colorful {
+    width: 100%;
+    height: auto;
+  }
+
+  .widget-color-picker .react-colorful__saturation {
+    width: 100%;
+    min-height: 148px;
+    margin-bottom: 2px;
+    border-radius: 8px;
+  }
+
+  .widget-color-picker .react-colorful__hue,
+  .widget-color-picker .react-colorful__alpha {
+    width: 100%;
+    height: 16px;
+    border-radius: 8px;
+  }
+
+  .widget-color-picker .react-colorful__hue {
+    margin-bottom: 2px;
+  }
+
+  .widget-color-picker .react-colorful__alpha {
+    margin-top: 2px;
+  }
 }

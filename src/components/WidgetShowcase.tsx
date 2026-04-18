@@ -19,14 +19,16 @@ const panelOrder: ShowcasePanelKey[] = ["primary", "secondary", "tertiary"];
 
 const ShowcasePanel = ({
   widget,
+  hasLicense,
   onWidgetChange,
 }: {
   widget: WidgetKey;
+  hasLicense: boolean;
   onWidgetChange: (widget: WidgetKey) => void;
 }) => {
   return (
-    <section className="relative min-h-0 overflow-hidden rounded-[24px] border border-black/10 bg-[#ddd6c8] shadow-[0_18px_40px_rgba(55,53,47,0.12)]">
-      <div className="absolute right-3 top-3 z-20">
+    <section className="flex min-h-0 flex-col overflow-hidden rounded-[24px] border border-black/10 bg-[#ddd6c8] shadow-[0_18px_40px_rgba(55,53,47,0.12)]">
+      <div className="flex justify-end px-3 pt-3">
         <select
           value={widget}
           onChange={(event) => onWidgetChange(event.target.value as WidgetKey)}
@@ -40,14 +42,14 @@ const ShowcasePanel = ({
           ))}
         </select>
       </div>
-      <div className="h-full w-full min-h-0 p-2 md:p-3">
-        {renderWidget(widget, "full")}
+      <div className="h-full w-full min-h-0 flex-1 p-2 pt-[2px] md:p-3 md:pt-[2px]">
+        {renderWidget({ widget, layout: "full", hasLicense })}
       </div>
     </section>
   );
 };
 
-const WidgetShowcase = () => {
+const WidgetShowcase = ({ hasLicense = false }: { hasLicense?: boolean }) => {
   const showcaseRef = useRef<HTMLDivElement>(null);
   const rightColumnRef = useRef<HTMLDivElement>(null);
   const [leftRatio, setLeftRatio] = useState(0.58);
@@ -132,6 +134,7 @@ const WidgetShowcase = () => {
           <div key={panel} className="min-h-[280px] flex-1">
             <ShowcasePanel
               widget={panelWidgets[panel]}
+              hasLicense={hasLicense}
               onWidgetChange={(widget) => updatePanel(panel, widget)}
             />
           </div>
@@ -147,6 +150,7 @@ const WidgetShowcase = () => {
       >
         <ShowcasePanel
           widget={panelWidgets.primary}
+          hasLicense={hasLicense}
           onWidgetChange={(widget) => updatePanel("primary", widget)}
         />
 
@@ -171,6 +175,7 @@ const WidgetShowcase = () => {
         >
           <ShowcasePanel
             widget={panelWidgets.secondary}
+            hasLicense={hasLicense}
             onWidgetChange={(widget) => updatePanel("secondary", widget)}
           />
 
@@ -188,6 +193,7 @@ const WidgetShowcase = () => {
 
           <ShowcasePanel
             widget={panelWidgets.tertiary}
+            hasLicense={hasLicense}
             onWidgetChange={(widget) => updatePanel("tertiary", widget)}
           />
         </div>

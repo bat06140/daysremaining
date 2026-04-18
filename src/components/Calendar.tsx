@@ -6,17 +6,27 @@ import { SquareContainer } from "./SquareContainer";
 import { cn } from "@/lib/utils";
 import { WidgetLayout } from "@/lib/view-config";
 import { WidgetFooter } from "./WidgetFooter";
+import { WidgetThemeEditor } from "./WidgetThemeEditor";
+import { useWidgetTheme } from "@/hook/useWidgetTheme";
+import { DEFAULT_WIDGET_THEME, withOpacity } from "@/lib/widget-theme";
 
 const Calendar = ({
-  showCopyright = true,
   onDateSelected,
   layout = "square",
+  hasLicense = false,
+  allowThemeEditor = true,
+  showBranding,
 }: {
-  showCopyright?: boolean;
   onDateSelected?: (event: React.MouseEvent, date: Date) => void;
   layout?: WidgetLayout;
+  hasLicense?: boolean;
+  allowThemeEditor?: boolean;
+  showBranding?: boolean;
 }) => {
   const gridRef = useRef<HTMLDivElement>(null);
+  const { theme } = useWidgetTheme();
+  const effectiveTheme = hasLicense ? theme : DEFAULT_WIDGET_THEME;
+  const shouldShowBranding = showBranding ?? !hasLicense;
 
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
@@ -97,15 +107,20 @@ const Calendar = ({
     <SquareContainer
       layout={layout}
       className={cn(
-        "gap-[2px]",
-        layout === "full" && "rounded-[8px] p-1"
+        "group relative gap-[2px]",
+        layout === "full" && "rounded-[8px] p-[2px]"
       )}
+      style={{
+        backgroundColor: effectiveTheme.color2,
+      }}
     >
+      <WidgetThemeEditor hasLicense={hasLicense && allowThemeEditor} />
       <CalendarHeader
         currentMonth={currentMonth}
         currentYear={currentYear}
         generateCalendar={generateCalendar}
         changeMonth={changeMonth}
+        theme={effectiveTheme}
       />
       <div
         ref={gridRef}
@@ -113,16 +128,23 @@ const Calendar = ({
           grid-template-rows: repeat(7, minmax(0, 1fr));
         `}
         className={cn(
-          "grid w-full min-h-0 grid-cols-7 rounded-[8px] border border-notion-light-gray-border p-1 box-border",
-          showCopyright ? "flex-[1_1_0]" : "flex-1"
+          "grid w-full min-h-0 grid-cols-7 gap-[2px] rounded-[8px]   box-border",
+          shouldShowBranding ? "flex-[1_1_0]" : "flex-1"
         )}
+        style={{
+          borderColor: withOpacity(effectiveTheme.color1, 0.12),
+          color: effectiveTheme.color1,
+        }}
       >
         {daysOfWeek.map((day, index) => (
-          <Day key={index}>{day}</Day>
+          <Day key={index} theme={effectiveTheme} isWeekdayHeader={true}>
+            {day}
+          </Day>
         ))}
         {daysFromPreviousMonth.map((day, index) => (
           <Day
             key={index}
+            theme={effectiveTheme}
             isOtherMonth={true}
             onClick={(e: React.MouseEvent) => {
               onDateSelected?.(e, new Date(currentYear, currentMonth - 1, day));
@@ -139,6 +161,7 @@ const Calendar = ({
           return (
             <Day
               key={index}
+              theme={effectiveTheme}
               isToday={isToday}
               onClick={(e: React.MouseEvent) => {
                 onDateSelected?.(e, new Date(currentYear, currentMonth, day));
@@ -151,6 +174,7 @@ const Calendar = ({
         {daysFromNextMonth.map((day, index) => (
           <Day
             key={index}
+            theme={effectiveTheme}
             isOtherMonth={true}
             onClick={(e: React.MouseEvent) => {
               onDateSelected?.(e, new Date(currentYear, currentMonth + 1, day));
@@ -160,8 +184,8 @@ const Calendar = ({
           </Day>
         ))}
       </div>
-      {showCopyright && (
-        <WidgetFooter />
+      {shouldShowBranding && (
+        <WidgetFooter theme={effectiveTheme} />
       )}
     </SquareContainer>
   );

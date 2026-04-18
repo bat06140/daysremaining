@@ -4,6 +4,7 @@ import { WidgetLayout } from "@/lib/view-config";
 
 interface SquareContainerProps {
   className?: string;
+  style?: React.CSSProperties;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
   children: React.ReactNode;
   layout?: WidgetLayout;
@@ -12,7 +13,7 @@ interface SquareContainerProps {
 export const SquareContainer = React.forwardRef<
   HTMLDivElement,
   SquareContainerProps
->(({ className = "", onClick, children, layout = "square" }, forwardedRef) => {
+>(({ className = "", style, onClick, children, layout = "square" }, forwardedRef) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Sync the forwarded ref with our local ref
@@ -71,6 +72,7 @@ export const SquareContainer = React.forwardRef<
         className
       )}
       style={{
+        ...style,
         minWidth: 0,
         minHeight: 0,
       }}
