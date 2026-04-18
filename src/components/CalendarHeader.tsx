@@ -70,7 +70,7 @@ const CalendarHeader = ({
   return (
     <>
       <div
-        className={`w-full flex justify-between items-center bg-notion-black text-white h-1/5 rounded-[8px] mb-[2px]`}
+        className={`w-full flex justify-between items-center bg-notion-black text-white h-1/5 rounded-[8px]`}
       >
         <AutosizeButton
           overrideTw={`h-full aspect-1/2 inline-flex items-center`}
