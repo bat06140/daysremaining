@@ -4,14 +4,23 @@ import { SquareContainer } from "./SquareContainer";
 import { cn } from "@/lib/utils";
 import { WidgetLayout } from "@/lib/view-config";
 import { WidgetFooter } from "./WidgetFooter";
+import { getSharedFittingFontSize } from "@/lib/font-fit";
+
+type BottomTileKey = "day" | "month" | "year";
 
 const ClockTile = ({
   text,
   heightRatio,
+  fontScale = 1,
+  fontSize,
+  onFontSizeChange,
   className,
 }: {
   text: string;
   heightRatio: number;
+  fontScale?: number;
+  fontSize?: number;
+  onFontSizeChange?: (fontSize: number) => void;
   className?: string;
 }) => {
   return (
@@ -22,8 +31,11 @@ const ClockTile = ({
       )}
     >
       <AutosizeText
-        overrideTw="px-2 font-bold tracking-[-0.04em] text-white"
+        overrideTw="px-2 font-bold tracking-normal text-white"
         heightRatio={heightRatio}
+        fontScale={fontScale}
+        fontSize={fontSize}
+        onFontSizeChange={onFontSizeChange}
       >
         {text}
       </AutosizeText>
@@ -39,6 +51,13 @@ const FlipClock = ({
   showCopyright?: boolean;
 }) => {
   const [now, setNow] = useState(() => new Date());
+  const [bottomMeasuredSizes, setBottomMeasuredSizes] = useState<
+    Record<BottomTileKey, number | undefined>
+  >({
+    day: undefined,
+    month: undefined,
+    year: undefined,
+  });
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
@@ -58,6 +77,17 @@ const FlipClock = ({
     .replace(".", "")
     .toUpperCase();
   const year = now.getFullYear();
+  const sharedBottomFontSize = getSharedFittingFontSize([
+    bottomMeasuredSizes.day,
+    bottomMeasuredSizes.month,
+    bottomMeasuredSizes.year,
+  ]);
+
+  const updateBottomMeasuredSize = (key: BottomTileKey, fontSize: number) => {
+    setBottomMeasuredSizes((current) =>
+      current[key] === fontSize ? current : { ...current, [key]: fontSize }
+    );
+  };
 
   return (
     <SquareContainer
@@ -73,16 +103,42 @@ const FlipClock = ({
             <ClockTile
               text={String(hours).padStart(2, "0")}
               heightRatio={0.8}
+              fontScale={0.96}
             />
             <ClockTile
               text={String(minutes).padStart(2, "0")}
               heightRatio={0.8}
+              fontScale={0.96}
             />
           </div>
           <div className="flex min-h-0 flex-[3] gap-[2px]">
-            <ClockTile text={String(day)} heightRatio={0.62} />
-            <ClockTile text={month} heightRatio={0.62} />
-            <ClockTile text={String(year)} heightRatio={0.62} />
+            <ClockTile
+              text={String(day)}
+              heightRatio={0.62}
+              fontScale={0.96}
+              fontSize={sharedBottomFontSize}
+              onFontSizeChange={(fontSize) =>
+                updateBottomMeasuredSize("day", fontSize)
+              }
+            />
+            <ClockTile
+              text={month}
+              heightRatio={0.62}
+              fontScale={0.96}
+              fontSize={sharedBottomFontSize}
+              onFontSizeChange={(fontSize) =>
+                updateBottomMeasuredSize("month", fontSize)
+              }
+            />
+            <ClockTile
+              text={String(year)}
+              heightRatio={0.62}
+              fontScale={0.96}
+              fontSize={sharedBottomFontSize}
+              onFontSizeChange={(fontSize) =>
+                updateBottomMeasuredSize("year", fontSize)
+              }
+            />
           </div>
         </div>
         {showCopyright && <WidgetFooter />}

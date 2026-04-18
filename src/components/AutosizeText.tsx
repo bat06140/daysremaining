@@ -5,32 +5,41 @@ import { ClassValue } from "clsx";
 import { useAutoFitFontSize } from "@/hook/useAutoFitFontSize";
 
 export interface AutosizeTextProps {
+  wrapperTw?: ClassValue;
   overrideTw?: ClassValue;
   overrideCss?: SerializedStyles;
   heightRatio?: number;
+  fontScale?: number;
+  fontSize?: number;
+  onFontSizeChange?: (fontSize: number) => void;
   onClick?: React.MouseEventHandler<HTMLElement>;
   children?: string;
 }
 export const AutosizeText = forwardRef<HTMLParagraphElement, AutosizeTextProps>(
   (props, ref) => {
     const {
+      wrapperTw,
       overrideTw,
       overrideCss,
       heightRatio = 0.5,
+      fontScale = 1,
+      fontSize,
+      onFontSizeChange,
       onClick,
       children,
     } = props;
-    const pRef = useRef<HTMLParagraphElement | null>(null);
+    const spanRef = useRef<HTMLSpanElement | null>(null);
 
-    useAutoFitFontSize(pRef, {
+    const measuredFontSize = useAutoFitFontSize(spanRef, {
       maxHeightRatio: heightRatio,
+      fontScale,
       watch: children,
+      onFontSizeChange,
     });
 
     return (
       <p
         ref={(node) => {
-          pRef.current = node;
           if (typeof ref === "function") {
             ref(node);
           } else if (ref) {
@@ -38,15 +47,24 @@ export const AutosizeText = forwardRef<HTMLParagraphElement, AutosizeTextProps>(
           }
         }}
         className={cn(
-          "flex h-full w-full items-center justify-center overflow-hidden whitespace-nowrap leading-none",
-          overrideTw
+          "grid h-full w-full place-items-center overflow-hidden",
+          wrapperTw
         )}
-        css={css`
-          ${overrideCss}
-        `}
         onClick={onClick}
       >
-        {children}
+        <span
+          ref={spanRef}
+          className={cn(
+            "block whitespace-nowrap text-center leading-none",
+            overrideTw
+          )}
+          css={css`
+            font-size: ${fontSize ?? measuredFontSize ?? 0}px;
+            ${overrideCss}
+          `}
+        >
+          {children}
+        </span>
       </p>
     );
   }

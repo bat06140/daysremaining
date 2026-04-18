@@ -59,8 +59,9 @@ export const CenteredPopover = ({
           onClick={onPopTrigger}
         >
           <AutosizeText
-            overrideTw="px-6 font-bold tracking-[-0.04em] text-white"
+            overrideTw="px-6 font-bold tracking-normal text-white"
             heightRatio={layout === "full" ? 0.58 : 0.64}
+            fontScale={0.94}
           >
             {textContent}
           </AutosizeText>

@@ -28,3 +28,21 @@ export const findLargestFittingFontSize = ({
 
   return best;
 };
+
+export const getSharedFittingFontSize = (
+  sizes: Array<number | undefined>
+): number | undefined => {
+  if (sizes.some((size) => size == null)) {
+    return undefined;
+  }
+
+  return Math.min(...(sizes as number[]));
+};
+
+export const scaleFontSize = (
+  size: number,
+  scale: number,
+  minSize: number
+): number => {
+  return Math.max(minSize, Math.floor(size * scale));
+};

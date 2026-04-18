@@ -17,8 +17,7 @@ export const AutosizeButton = ({
   children?: string;
 }) => {
   const ref = useRef<HTMLButtonElement>(null);
-
-  useAutoFitFontSize(ref, {
+  const fontSize = useAutoFitFontSize(ref, {
     maxHeightRatio: heightRatio,
     watch: children,
   });
@@ -30,7 +29,10 @@ export const AutosizeButton = ({
         "flex items-center justify-center bg-transparent p-0 text-white leading-none",
         overrideTw
       )}
-      style={overrideCss}
+      style={{
+        fontSize: fontSize ? `${fontSize}px` : undefined,
+        ...overrideCss,
+      }}
       onClick={onClick}
     >
       {children}

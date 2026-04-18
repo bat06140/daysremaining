@@ -1,11 +1,13 @@
-import { RefObject, useEffect } from "react";
-import { findLargestFittingFontSize } from "@/lib/font-fit";
+import { RefObject, useEffect, useState } from "react";
+import { findLargestFittingFontSize, scaleFontSize } from "@/lib/font-fit";
 
 interface UseAutoFitFontSizeOptions {
   maxHeightRatio?: number;
   maxFontSize?: number;
   minFontSize?: number;
+  fontScale?: number;
   watch?: string | number | undefined;
+  onFontSizeChange?: (fontSize: number) => void;
 }
 
 export const useAutoFitFontSize = (
@@ -16,8 +18,11 @@ export const useAutoFitFontSize = (
     maxHeightRatio = 1,
     maxFontSize = Number.POSITIVE_INFINITY,
     minFontSize = 12,
+    fontScale = 1,
     watch,
+    onFontSizeChange,
   } = options;
+  const [fontSize, setFontSize] = useState<number>();
 
   useEffect(() => {
     const element = ref.current;
@@ -101,7 +106,9 @@ export const useAutoFitFontSize = (
         },
       });
 
-      element.style.fontSize = `${nextSize}px`;
+      const scaledSize = scaleFontSize(nextSize, fontScale, minFontSize);
+      setFontSize((current) => (current === scaledSize ? current : scaledSize));
+      onFontSizeChange?.(scaledSize);
     };
 
     const scheduleFit = () => {
@@ -122,5 +129,15 @@ export const useAutoFitFontSize = (
       resizeObserver.disconnect();
       window.removeEventListener("resize", scheduleFit);
     };
-  }, [ref, maxHeightRatio, maxFontSize, minFontSize, watch]);
+  }, [
+    ref,
+    maxHeightRatio,
+    maxFontSize,
+    minFontSize,
+    fontScale,
+    watch,
+    onFontSizeChange,
+  ]);
+
+  return fontSize;
 };

@@ -1,6 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { findLargestFittingFontSize } from "../src/lib/font-fit.js";
+import {
+  findLargestFittingFontSize,
+  getSharedFittingFontSize,
+} from "../src/lib/font-fit.js";
 
 test("findLargestFittingFontSize keeps the maximum size when it already fits", () => {
   const size = findLargestFittingFontSize({
@@ -30,4 +33,16 @@ test("findLargestFittingFontSize honors the minimum when nothing larger fits", (
   });
 
   assert.equal(size, 12);
+});
+
+test("getSharedFittingFontSize uses the smallest measured size across a group", () => {
+  const size = getSharedFittingFontSize([38, 41, 35]);
+
+  assert.equal(size, 35);
+});
+
+test("getSharedFittingFontSize returns undefined until every panel has reported a size", () => {
+  const size = getSharedFittingFontSize([38, undefined, 35]);
+
+  assert.equal(size, undefined);
 });

@@ -17,8 +17,8 @@ export const Day = ({
   return (
     <div className="w-full h-full flex items-center justify-center">
       <AutosizeText
-        overrideTw={clsx(
-          "rounded-[4px] aspect-square flex justify-center items-center",
+        wrapperTw={clsx(
+          "h-full w-full rounded-[8px]",
           "hover:border hover:bg-notion-black hover:text-white",
           {
             "bg-[#37352F] text-white": isToday,
