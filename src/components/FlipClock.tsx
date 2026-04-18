@@ -1,18 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
-import "./FlipClock.css";
-
-const FlipNumber = ({ number }) => {
-  const ref = useRef(null);
+import { SquareContainer } from "./SquareContainer";
+const FlipNumber = ({ number }: { number: number }) => {
+  const ref = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
   const [containerHeight, setContainerHeight] = useState(0);
   useEffect(() => {
-    setContainerWidth(ref.current.offsetWidth);
-    setContainerHeight(ref.current.offsetHeight);
+    if (ref?.current) {
+      setContainerWidth(ref.current.offsetWidth);
+      setContainerHeight(ref.current.offsetHeight);
+    }
   }, [ref?.current]);
   return (
     <div
       ref={ref}
-      className="flip-number"
+      className="bg-[#2a2a2a] flex flex-1 items-center justify-center font-bold relative w-auto  rounded-[4px] leading-none"
       style={{ fontSize: containerWidth > containerHeight ? `35vh` : `35vw` }}
     >
       {String(number).padStart(2, "0")}
@@ -20,18 +21,20 @@ const FlipNumber = ({ number }) => {
   );
 };
 
-const FlipDate = ({ text }) => {
-  const ref = useRef(null);
+const FlipDate = ({ text }: { text: string | number }) => {
+  const ref = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
   const [containerHeight, setContainerHeight] = useState(0);
   useEffect(() => {
-    setContainerWidth(ref.current.offsetWidth);
-    setContainerHeight(ref.current.offsetHeight);
+    if (ref?.current) {
+      setContainerWidth(ref.current.offsetWidth);
+      setContainerHeight(ref.current.offsetHeight);
+    }
   }, [ref?.current]);
   return (
     <div
       ref={ref}
-      className="flip-date"
+      className="bg-[#2a2a2a] flex flex-1 items-center justify-center font-bold relative w-auto  rounded-[4px] leading-none"
       style={{ fontSize: containerWidth > containerHeight ? `15vh` : `15vw` }}
     >
       {text}
@@ -40,7 +43,7 @@ const FlipDate = ({ text }) => {
 };
 
 const FlipClock = () => {
-  const clockRef = useRef(null);
+  const clockRef = useRef<HTMLDivElement>(null);
   const [timeFontSize, setTimeFontSize] = React.useState(0);
   const [dateFontSize, setDateFontSize] = React.useState(0);
 
@@ -89,20 +92,22 @@ const FlipClock = () => {
   const year = date.getUTCFullYear();
 
   return (
-    <div
-      className="flex flex-col w-screen h-screen text-white rounded-sm"
-      ref={clockRef}
-    >
-      <div className="h-7/10 gap-[2px] flex justify-center rounded-sm">
-        <FlipNumber number={hours} fontSize={timeFontSize} />
-        <FlipNumber number={minutes} fontSize={timeFontSize} />
+    <SquareContainer>
+      <div
+        className="flex flex-col w-full h-full gap-[2px] text-white rounded-sm"
+        ref={clockRef}
+      >
+        <div className="h-[70%] gap-[2px] flex justify-center rounded-sm">
+          <FlipNumber number={hours} />
+          <FlipNumber number={minutes} />
+        </div>
+        <div className="h-[30%] flex justify-center gap-[2px] rounded-[4px]">
+          <FlipDate text={day} />
+          <FlipDate text={month} />
+          <FlipDate text={year} />
+        </div>
       </div>
-      <div className="date-section">
-        <FlipDate text={day} fontSize={dateFontSize} />
-        <FlipDate text={month} fontSize={dateFontSize} />
-        <FlipDate text={year} fontSize={dateFontSize} />
-      </div>
-    </div>
+    </SquareContainer>
   );
 };
 
