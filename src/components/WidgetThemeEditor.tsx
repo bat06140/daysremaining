@@ -134,7 +134,7 @@ export const WidgetThemeEditor = ({
     <>
       <div
         className={cn(
-          "pointer-events-none absolute bottom-4 right-4 z-20 opacity-0 transition",
+          "pointer-events-none absolute bottom-1 right-1 z-20 opacity-0 transition",
           !suspendHoverReveal && "group-hover:opacity-100",
           isOpen && "opacity-100",
           paletteButtonClassName
