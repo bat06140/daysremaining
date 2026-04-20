@@ -31,7 +31,7 @@ const ThemeColorField = ({
   return (
     <button
       type="button"
-      className="flex min-w-0 items-center justify-between gap-[2px] rounded-[8px] border border-black/10 bg-[#f6f2ea] px-2 py-2 text-left transition hover:border-black/20"
+      className="flex min-w-0 items-center justify-between gap-[2px] rounded-[8px] border border-black/10 bg-[#f6f2ea] px-[2px] py-[2px] text-left transition hover:border-black/20"
       onClick={onActivate}
     >
       <div className="min-w-0">
@@ -46,7 +46,7 @@ const ThemeColorField = ({
         </div>
       </div>
       <span
-        className="h-9 w-9 shrink-0 rounded-[8px] border border-black/10 shadow-inner"
+        className="h-8 w-8 shrink-0 rounded-[8px] border border-black/10 shadow-inner"
         style={{ background: formatRgbaString(rgba) }}
       ></span>
     </button>
@@ -134,7 +134,7 @@ export const WidgetThemeEditor = ({
     <>
       <div
         className={cn(
-          "pointer-events-none absolute bottom-[8px] right-[8px] z-20 opacity-0 transition",
+          "pointer-events-none absolute bottom-4 right-4 z-20 opacity-0 transition",
           !suspendHoverReveal && "group-hover:opacity-100",
           isOpen && "opacity-100",
           paletteButtonClassName
@@ -142,7 +142,7 @@ export const WidgetThemeEditor = ({
       >
         <button
           type="button"
-          className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-[8px] border border-white/40 bg-[conic-gradient(from_180deg_at_50%_50%,_#ff8a8a,_#ffd36f,_#8fe3ff,_#d29bff,_#ff8a8a)] shadow-[0_10px_24px_rgba(0,0,0,0.22)] transition hover:scale-[1.02]"
+          className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full border border-white/40 bg-[conic-gradient(from_180deg_at_50%_50%,_#ff8a8a,_#ffd36f,_#8fe3ff,_#d29bff,_#ff8a8a)] shadow-[0_10px_24px_rgba(0,0,0,0.22)] transition hover:scale-[1.02]"
           aria-label="Customize widget colors"
           onClick={(event) => {
             event.preventDefault();
@@ -154,7 +154,7 @@ export const WidgetThemeEditor = ({
             setIsOpen(true);
           }}
         >
-          <span className="flex h-7 w-7 items-center justify-center rounded-[8px] bg-white/90 text-notion-black backdrop-blur">
+          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-notion-black backdrop-blur">
             <Palette size={14} />
           </span>
         </button>
@@ -162,7 +162,7 @@ export const WidgetThemeEditor = ({
 
       {isOpen && (
         <div
-          className="absolute inset-0 z-30 flex items-end justify-center rounded-[inherit] bg-black/32 p-[2px]"
+          className="absolute top-1/2 bottom-1/2 translate-y-1/2  inset-0 z-30 flex items-center justify-center rounded-[inherit] bg-black/32"
           onClick={(event) => {
             event.preventDefault();
             event.stopPropagation();
@@ -176,12 +176,21 @@ export const WidgetThemeEditor = ({
               event.stopPropagation();
             }}
           >
-            <div className="mb-[2px] flex items-center justify-between">
-              <div>
-                <p className="text-[10px] uppercase tracking-[0.2em] text-black/45">
-                  Premium Theme
-                </p>
-                <h2 className="font-sans text-xl leading-none">Palette</h2>
+            <div className="mb-[2px] flex items-center justify-between gap-[2px]">
+              <div className="flex min-w-0 flex-1 items-center gap-[8px]">
+                {activeColorKey != null && (
+                  <button
+                    type="button"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border border-black/10 text-black/65"
+                    aria-label="Back to color list"
+                    onClick={() => setActiveColorKey(null)}
+                  >
+                    <ArrowLeft size={16} />
+                  </button>
+                )}
+                <div className="min-w-0">
+                  <h2 className="font-sans text-xl leading-none">Choisir une couleur</h2>
+                </div>
               </div>
               <button
                 type="button"
@@ -195,7 +204,7 @@ export const WidgetThemeEditor = ({
 
             {activeColorKey == null ? (
               <div className="grid gap-[2px]">
-                <p className="text-xs text-black/60">
+                <p className="px-[2px] text-xs text-black/60">
                   Choisis une couleur pour ouvrir son panneau d’édition.
                 </p>
                 <ThemeColorField
@@ -211,48 +220,21 @@ export const WidgetThemeEditor = ({
               </div>
             ) : (
               <div className="grid gap-[2px]">
-                <div className="flex items-center gap-[2px]">
-                  <button
-                    type="button"
-                    className="flex h-8 w-8 items-center justify-center rounded-[8px] border border-black/10 text-black/65"
-                    aria-label="Back to color list"
-                    onClick={() => setActiveColorKey(null)}
-                  >
-                    <ArrowLeft size={16} />
-                  </button>
-                  <div className="flex min-w-0 flex-1 items-center gap-[2px] rounded-[8px] border border-black/10 bg-[#f6f2ea] px-2 py-2">
-                    <span
-                      className="h-8 w-8 shrink-0 rounded-[8px] border border-black/10 shadow-inner"
-                      style={{ background: formatRgbaString(activeRgba) }}
-                    ></span>
-                    <div className="min-w-0">
-                      <div className="text-[10px] uppercase tracking-[0.16em] text-black/45">
-                        {activeColorKey === "color1" ? "Color 1" : "Color 2"}
-                      </div>
-                      <div className="truncate text-sm font-medium text-notion-black">
-                        {formatThemeInputValue(
-                          draftTheme[resolvedActiveColorKey],
-                          inputMode
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-[8px] border border-black/10 bg-[#f6f2ea] p-[2px]">
+                {/* <div className="rounded-[8px] border border-black/10 bg-[#f6f2ea] p-[2px]"> */}
                   <div className="widget-color-picker">
                     <RgbaColorPicker
                       color={activeRgba}
                       onChange={updateActiveColorFromRgba}
+                      style={{ width: "100%" }}
                     />
-                  </div>
+                  {/* </div> */}
                 </div>
 
                 <div className="flex rounded-[8px] border border-black/10 bg-[#f6f2ea] p-[2px]">
                   <button
                     type="button"
                     className={cn(
-                      "flex-1 rounded-[8px] px-3 py-[6px] text-sm font-medium transition",
+                      "flex-1 rounded-[8px] px-[2px] py-[2px] text-sm font-medium transition",
                       inputMode === "hex"
                         ? "bg-notion-black text-white"
                         : "text-notion-black/70"
@@ -264,7 +246,7 @@ export const WidgetThemeEditor = ({
                   <button
                     type="button"
                     className={cn(
-                      "flex-1 rounded-[8px] px-3 py-[6px] text-sm font-medium transition",
+                      "flex-1 rounded-[8px] px-[2px] py-[2px] text-sm font-medium transition",
                       inputMode === "rgba"
                         ? "bg-notion-black text-white"
                         : "text-notion-black/70"
@@ -281,7 +263,7 @@ export const WidgetThemeEditor = ({
                   </span>
                   <input
                     value={inputDraft}
-                    className="rounded-[8px] border border-black/10 bg-white px-3 py-2 text-sm"
+                    className="rounded-[8px] border border-black/10 bg-white px-[2px] py-[2px] text-sm"
                     onChange={(event) => {
                       const nextValue = event.target.value;
                       setInputDraft(nextValue);
@@ -300,14 +282,14 @@ export const WidgetThemeEditor = ({
             <div className="mt-[2px] flex justify-end gap-[2px]">
               <button
                 type="button"
-                className="rounded-[8px] border border-black/10 px-4 py-2 text-sm font-medium text-notion-black"
+                className="rounded-[8px] border border-black/10 px-[6px] py-[2px] text-sm font-medium text-notion-black"
                 onClick={closeEditor}
               >
                 Annuler
               </button>
               <button
                 type="button"
-                className="rounded-[8px] bg-notion-black px-4 py-2 text-sm font-medium text-white"
+                className="rounded-[8px] bg-notion-black px-[6px] py-[2px] text-sm font-medium text-white"
                 onClick={() => {
                   saveTheme(draftTheme);
                   setIsOpen(false);

@@ -104,13 +104,13 @@ layer(base);
 
   .widget-color-picker .react-colorful {
     width: 100%;
+    max-width: none;
     height: auto;
   }
 
   .widget-color-picker .react-colorful__saturation {
     width: 100%;
-    min-height: 148px;
-    margin-bottom: 2px;
+    min-height: 138px;
     border-radius: 8px;
   }
 
@@ -118,14 +118,18 @@ layer(base);
   .widget-color-picker .react-colorful__alpha {
     width: 100%;
     height: 16px;
-    border-radius: 8px;
+    
+  }
+
+  .widget-color-picker .react-colorful__interactive {
+    inset: 0;
   }
 
   .widget-color-picker .react-colorful__hue {
-    margin-bottom: 2px;
+    
   }
 
   .widget-color-picker .react-colorful__alpha {
-    margin-top: 2px;
+    
   }
 }

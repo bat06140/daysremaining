@@ -14,6 +14,8 @@ export interface AutosizeTextProps {
   fontSize?: number;
   onFontSizeChange?: (fontSize: number) => void;
   onClick?: React.MouseEventHandler<HTMLElement>;
+  onMouseEnter?: React.MouseEventHandler<HTMLElement>;
+  onMouseLeave?: React.MouseEventHandler<HTMLElement>;
   children?: string;
 }
 export const AutosizeText = forwardRef<HTMLParagraphElement, AutosizeTextProps>(
@@ -28,6 +30,8 @@ export const AutosizeText = forwardRef<HTMLParagraphElement, AutosizeTextProps>(
       fontSize,
       onFontSizeChange,
       onClick,
+      onMouseEnter,
+      onMouseLeave,
       children,
     } = props;
     const spanRef = useRef<HTMLSpanElement | null>(null);
@@ -54,6 +58,8 @@ export const AutosizeText = forwardRef<HTMLParagraphElement, AutosizeTextProps>(
         )}
         style={wrapperStyle}
         onClick={onClick}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
       >
         <span
           ref={spanRef}

@@ -72,6 +72,7 @@ const CalendarHeader = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [openMenu, setOpenMenu] = useState<HeaderMenuKey>(null);
+  const [menuMaxHeight, setMenuMaxHeight] = useState(180);
   const [measuredSizes, setMeasuredSizes] = useState<
     Record<HeaderLabelKey, number | undefined>
   >({
@@ -99,6 +100,38 @@ const CalendarHeader = ({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [openMenu]);
+
+  useEffect(() => {
+    const updateMenuMaxHeight = () => {
+      const container = containerRef.current;
+      const parent = container?.parentElement;
+
+      if (!container || !parent) {
+        return;
+      }
+
+      const availableHeight =
+        parent.clientHeight - container.offsetTop - container.offsetHeight - 2;
+      setMenuMaxHeight(Math.max(72, availableHeight));
+    };
+
+    updateMenuMaxHeight();
+
+    const resizeObserver = new ResizeObserver(updateMenuMaxHeight);
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+    if (containerRef.current?.parentElement) {
+      resizeObserver.observe(containerRef.current.parentElement);
+    }
+
+    window.addEventListener("resize", updateMenuMaxHeight);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", updateMenuMaxHeight);
+    };
+  }, []);
 
   const months = [
     "Janvier",
@@ -165,10 +198,11 @@ const CalendarHeader = ({
           />
           {openMenu === "month" && (
             <div
-              className="absolute left-0 top-full z-30 mt-[2px] max-h-56 w-full overflow-y-auto rounded-[8px] border shadow-[0_12px_30px_rgba(0,0,0,0.18)]"
+              className="absolute left-0 top-full z-30 mt-[2px] w-full overflow-y-auto rounded-[8px] border shadow-[0_12px_30px_rgba(0,0,0,0.18)]"
               style={{
                 backgroundColor: theme.color2,
                 borderColor: theme.color1,
+                maxHeight: `${menuMaxHeight}px`,
               }}
             >
               {months.map((month, index) => (
@@ -210,10 +244,11 @@ const CalendarHeader = ({
           />
           {openMenu === "year" && (
             <div
-              className="absolute left-0 top-full z-30 mt-[2px] max-h-56 w-full overflow-y-auto rounded-[8px] border shadow-[0_12px_30px_rgba(0,0,0,0.18)]"
+              className="absolute left-0 top-full z-30 mt-[2px] w-full overflow-y-auto rounded-[8px] border shadow-[0_12px_30px_rgba(0,0,0,0.18)]"
               style={{
                 backgroundColor: theme.color2,
                 borderColor: theme.color1,
+                maxHeight: `${menuMaxHeight}px`,
               }}
             >
               {years.map((year) => (

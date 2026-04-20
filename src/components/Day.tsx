@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import clsx from "clsx";
 import { AutosizeText } from "./AutosizeText";
 import { WidgetTheme } from "@/lib/widget-theme";
@@ -20,11 +21,33 @@ export const Day = ({
   theme: WidgetTheme;
   children: string;
 }) => {
+  const [isHovered, setIsHovered] = useState(false);
   const appearance = getCalendarDayAppearance(theme, {
     isWeekdayHeader,
     isToday,
     isOtherMonth,
   });
+  const resolvedAppearance = useMemo(
+    () => ({
+      textColor:
+        appearance.interactive && isHovered
+          ? appearance.hoverTextColor
+          : appearance.textColor,
+      backgroundColor:
+        appearance.interactive && isHovered
+          ? appearance.hoverBackgroundColor
+          : appearance.backgroundColor,
+      borderColor:
+        appearance.interactive && isHovered
+          ? appearance.hoverBorderColor
+          : appearance.borderColor,
+      borderStyle:
+        appearance.interactive && isHovered
+          ? appearance.hoverBorderStyle
+          : appearance.borderStyle,
+    }),
+    [appearance, isHovered]
+  );
 
   return (
     <div className="w-full h-full flex items-center justify-center">
@@ -32,21 +55,27 @@ export const Day = ({
         wrapperTw={clsx(
           "h-full w-full rounded-[8px]",
           "border border-[var(--day-border)] bg-[var(--day-bg)] text-[var(--day-text)] transition-colors",
-          appearance.borderStyle === "none" && "border-transparent",
-          appearance.borderStyle === "solid" && "border-solid",
-          appearance.interactive &&
-            "hover:border-[var(--day-hover-border)] hover:border-dashed hover:bg-[var(--day-hover-bg)] hover:text-[var(--day-hover-text)]"
+          resolvedAppearance.borderStyle === "none" && "border-transparent",
+          resolvedAppearance.borderStyle === "solid" && "border-solid",
+          resolvedAppearance.borderStyle === "dashed" && "border-dashed"
         )}
         wrapperStyle={{
-          ["--day-bg" as string]: appearance.backgroundColor,
-          ["--day-text" as string]: appearance.textColor,
-          ["--day-border" as string]: appearance.borderColor,
-          ["--day-hover-border" as string]: appearance.hoverBorderColor,
-          ["--day-hover-bg" as string]: appearance.hoverBackgroundColor,
-          ["--day-hover-text" as string]: appearance.hoverTextColor,
+          ["--day-bg" as string]: resolvedAppearance.backgroundColor,
+          ["--day-text" as string]: resolvedAppearance.textColor,
+          ["--day-border" as string]: resolvedAppearance.borderColor,
         }}
         heightRatio={isWeekdayHeader ? 0.46 : 0.7}
         onClick={onClick}
+        onMouseEnter={() => {
+          if (appearance.interactive) {
+            setIsHovered(true);
+          }
+        }}
+        onMouseLeave={() => {
+          if (appearance.interactive) {
+            setIsHovered(false);
+          }
+        }}
       >
         {children}
       </AutosizeText>
