@@ -209,7 +209,7 @@ const CalendarHeader = ({
                 <button
                   key={month}
                   type="button"
-                  className="w-full px-3 py-2 text-left font-sans text-sm uppercase"
+                  className="w-full px-3 py-2 text-left font-sans text-[18px] leading-none uppercase"
                   style={{
                     color: theme.color1,
                     backgroundColor:
@@ -255,7 +255,7 @@ const CalendarHeader = ({
                 <button
                   key={year}
                   type="button"
-                  className="w-full px-3 py-2 text-left font-sans text-sm uppercase"
+                  className="w-full px-3 py-2 text-left font-sans text-[18px] leading-none uppercase"
                   style={{
                     color: theme.color1,
                     backgroundColor:

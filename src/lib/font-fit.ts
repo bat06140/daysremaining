@@ -46,3 +46,18 @@ export const scaleFontSize = (
 ): number => {
   return Math.max(minSize, Math.floor(size * scale));
 };
+
+export const stabilizeFontSize = (
+  currentSize: number | undefined,
+  nextSize: number,
+  tolerance = 1
+): number => {
+  if (
+    currentSize != null &&
+    Math.abs(currentSize - nextSize) <= Math.max(0, tolerance)
+  ) {
+    return currentSize;
+  }
+
+  return nextSize;
+};

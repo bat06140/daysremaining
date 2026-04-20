@@ -1,5 +1,9 @@
 import { RefObject, useEffect, useState } from "react";
-import { findLargestFittingFontSize, scaleFontSize } from "@/lib/font-fit";
+import {
+  findLargestFittingFontSize,
+  scaleFontSize,
+  stabilizeFontSize,
+} from "@/lib/font-fit";
 
 interface UseAutoFitFontSizeOptions {
   maxHeightRatio?: number;
@@ -107,8 +111,11 @@ export const useAutoFitFontSize = (
       });
 
       const scaledSize = scaleFontSize(nextSize, fontScale, minFontSize);
-      setFontSize((current) => (current === scaledSize ? current : scaledSize));
-      onFontSizeChange?.(scaledSize);
+      setFontSize((current) => {
+        const stabilizedSize = stabilizeFontSize(current, scaledSize);
+        onFontSizeChange?.(stabilizedSize);
+        return current === stabilizedSize ? current : stabilizedSize;
+      });
     };
 
     const scheduleFit = () => {
