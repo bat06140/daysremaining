@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { DEFAULT_WIDGET_PURCHASE_URL } from "../src/lib/widget-access.js";
 import {
   getInitialAppState,
   getWidgetSelection,
@@ -10,7 +11,7 @@ test("readWidgetRuntime returns locked mode by default", () => {
   assert.deepEqual(readWidgetRuntime(undefined), {
     widget: undefined,
     accessGranted: false,
-    purchaseUrl: "https://atomicskills.academy/widgets-notion/",
+    purchaseUrl: DEFAULT_WIDGET_PURCHASE_URL,
   });
 });
 
@@ -20,14 +21,14 @@ test("readWidgetRuntime normalizes server-injected access state", () => {
       widget: "calendar",
       accessGranted: true,
       reason: "license revoked",
-      purchaseUrl: "https://atomicskills.academy/widgets-notion/",
+      purchaseUrl: DEFAULT_WIDGET_PURCHASE_URL,
     },
   });
 
   assert.deepEqual(runtime, {
     widget: "calendar",
     accessGranted: true,
-    purchaseUrl: "https://atomicskills.academy/widgets-notion/",
+    purchaseUrl: DEFAULT_WIDGET_PURCHASE_URL,
     reason: "license revoked",
   });
 });
@@ -44,7 +45,7 @@ test("readWidgetRuntime ignores invalid runtime payload fields", () => {
   assert.deepEqual(runtime, {
     widget: undefined,
     accessGranted: false,
-    purchaseUrl: "https://atomicskills.academy/widgets-notion/",
+    purchaseUrl: DEFAULT_WIDGET_PURCHASE_URL,
   });
 });
 
@@ -53,7 +54,7 @@ test("getWidgetSelection prefers the runtime widget over the env widget", () => 
     __WIDGET_RUNTIME__: {
       widget: "clock",
       accessGranted: true,
-      purchaseUrl: "https://atomicskills.academy/widgets-notion/",
+      purchaseUrl: DEFAULT_WIDGET_PURCHASE_URL,
     },
   });
 
@@ -65,7 +66,7 @@ test("getWidgetSelection falls back to the env widget when runtime widget is abs
     __WIDGET_RUNTIME__: {
       widget: "not-a-widget",
       accessGranted: true,
-      purchaseUrl: "https://atomicskills.academy/widgets-notion/",
+      purchaseUrl: DEFAULT_WIDGET_PURCHASE_URL,
     },
   } as unknown as Window);
 
@@ -78,7 +79,7 @@ test("getInitialAppState uses the runtime widget on the first render", () => {
     __WIDGET_RUNTIME__: {
       widget: "clock",
       accessGranted: true,
-      purchaseUrl: "https://atomicskills.academy/widgets-notion/",
+      purchaseUrl: DEFAULT_WIDGET_PURCHASE_URL,
       reason: "access granted",
     },
   } as unknown as Window);

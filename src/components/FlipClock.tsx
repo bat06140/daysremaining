@@ -1,14 +1,19 @@
 import { css } from "@emotion/react";
 import { useEffect, useState } from "react";
-import { AutosizeText } from "./AutosizeText";
-import { SquareContainer } from "./SquareContainer";
-import { cn } from "@/lib/utils";
-import { WidgetLayout } from "@/lib/view-config";
-import { WidgetFooter } from "./WidgetFooter";
-import { getSharedFittingFontSize } from "@/lib/font-fit";
-import { WidgetThemeEditor } from "./WidgetThemeEditor";
-import { useWidgetTheme } from "@/hook/useWidgetTheme";
-import { DEFAULT_WIDGET_THEME } from "@/lib/widget-theme";
+import { AutosizeText } from "./AutosizeText.js";
+import { SquareContainer } from "./SquareContainer.js";
+import { cn } from "../lib/utils.js";
+import { WidgetLayout } from "../lib/view-config.js";
+import { WidgetFooter } from "./WidgetFooter.js";
+import { getSharedFittingFontSize } from "../lib/font-fit.js";
+import { WidgetThemeEditor } from "./WidgetThemeEditor.js";
+import { useWidgetTheme } from "../hook/useWidgetTheme.js";
+import { DEFAULT_WIDGET_THEME } from "../lib/widget-theme.js";
+import {
+  DEFAULT_WIDGET_PURCHASE_URL,
+  getThemeEditorMode,
+  shouldShowWidgetBranding,
+} from "../lib/widget-access.js";
 
 type BottomTileKey = "day" | "month" | "year";
 
@@ -57,18 +62,24 @@ const ClockTile = ({
 
 const FlipClock = ({
   layout = "square",
-  hasLicense = false,
+  accessGranted = false,
   allowThemeEditor = true,
   showBranding,
+  purchaseUrl = DEFAULT_WIDGET_PURCHASE_URL,
 }: {
   layout?: WidgetLayout;
-  hasLicense?: boolean;
+  accessGranted?: boolean;
   allowThemeEditor?: boolean;
   showBranding?: boolean;
+  purchaseUrl?: string;
 }) => {
   const { theme } = useWidgetTheme();
-  const effectiveTheme = hasLicense ? theme : DEFAULT_WIDGET_THEME;
-  const shouldShowBranding = showBranding ?? !hasLicense;
+  const effectiveTheme = accessGranted ? theme : DEFAULT_WIDGET_THEME;
+  const editorMode = getThemeEditorMode(accessGranted, allowThemeEditor);
+  const shouldRenderBranding = shouldShowWidgetBranding(
+    accessGranted,
+    showBranding
+  );
   const [now, setNow] = useState(() => new Date());
   const [bottomMeasuredSizes, setBottomMeasuredSizes] = useState<
     Record<BottomTileKey, number | undefined>
@@ -116,7 +127,7 @@ const FlipClock = ({
         layout === "full" && "rounded-[8px] p-1"
       )}
     >
-      <WidgetThemeEditor hasLicense={hasLicense && allowThemeEditor} />
+      <WidgetThemeEditor mode={editorMode} purchaseUrl={purchaseUrl} />
       <div className="flex h-full w-full min-h-0 flex-col gap-[2px] rounded-[8px] text-white">
         <div className="flex min-h-0 flex-1 flex-col gap-[2px]">
           <div className="flex min-h-0 flex-[7] gap-[2px]">
@@ -171,7 +182,7 @@ const FlipClock = ({
             />
           </div>
         </div>
-        {shouldShowBranding && <WidgetFooter theme={effectiveTheme} />}
+        {shouldRenderBranding && <WidgetFooter theme={effectiveTheme} />}
       </div>
     </SquareContainer>
   );

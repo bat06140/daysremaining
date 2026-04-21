@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { WidgetThemeContext } from "@/context/WidgetThemeContext";
+import { WidgetThemeContext } from "../context/WidgetThemeContext.js";
 
 export const useWidgetTheme = () => {
   const context = useContext(WidgetThemeContext);

@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
 import clsx from "clsx";
-import { AutosizeText } from "./AutosizeText";
-import { WidgetTheme } from "@/lib/widget-theme";
-import { getCalendarDayAppearance } from "@/lib/calendar-theme";
+import { AutosizeText } from "./AutosizeText.js";
+import { WidgetTheme } from "../lib/widget-theme.js";
+import { getCalendarDayAppearance } from "../lib/calendar-theme.js";
 
 export const Day = ({
   isWeekdayHeader = false,

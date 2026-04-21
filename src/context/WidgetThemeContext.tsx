@@ -4,7 +4,7 @@ import {
   DEFAULT_WIDGET_THEME,
   readWidgetThemeFromCookieString,
   WidgetTheme,
-} from "@/lib/widget-theme";
+} from "../lib/widget-theme.js";
 
 export interface WidgetThemeContextValue {
   theme: WidgetTheme;

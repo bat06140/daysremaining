@@ -1,6 +1,5 @@
 import { resolveAppView, type WidgetKey } from "./view-config.js";
-
-const DEFAULT_PURCHASE_URL = "https://atomicskills.academy/widgets-notion/";
+import { DEFAULT_WIDGET_PURCHASE_URL } from "./widget-access.js";
 const WIDGET_KEYS: readonly WidgetKey[] = ["calendar", "daysRemaining", "clock"];
 
 export type WidgetRuntime = {
@@ -50,7 +49,7 @@ export function readWidgetRuntime(
     purchaseUrl:
       typeof runtime?.purchaseUrl === "string"
         ? runtime.purchaseUrl
-        : DEFAULT_PURCHASE_URL,
+        : DEFAULT_WIDGET_PURCHASE_URL,
     ...(reason !== undefined ? { reason } : {}),
   };
 }

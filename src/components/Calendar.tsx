@@ -1,32 +1,43 @@
 import { useRef, useState } from "react";
-import CalendarHeader from "./CalendarHeader";
-import { Day } from "./Day";
+import CalendarHeader from "./CalendarHeader.js";
+import { Day } from "./Day.js";
 import { css } from "@emotion/react";
-import { SquareContainer } from "./SquareContainer";
-import { cn } from "@/lib/utils";
-import { WidgetLayout } from "@/lib/view-config";
-import { WidgetFooter } from "./WidgetFooter";
-import { WidgetThemeEditor } from "./WidgetThemeEditor";
-import { useWidgetTheme } from "@/hook/useWidgetTheme";
-import { DEFAULT_WIDGET_THEME, withOpacity } from "@/lib/widget-theme";
+import { SquareContainer } from "./SquareContainer.js";
+import { cn } from "../lib/utils.js";
+import { WidgetLayout } from "../lib/view-config.js";
+import { WidgetFooter } from "./WidgetFooter.js";
+import { WidgetThemeEditor } from "./WidgetThemeEditor.js";
+import { useWidgetTheme } from "../hook/useWidgetTheme.js";
+import { DEFAULT_WIDGET_THEME, withOpacity } from "../lib/widget-theme.js";
+import {
+  DEFAULT_WIDGET_PURCHASE_URL,
+  getThemeEditorMode,
+  shouldShowWidgetBranding,
+} from "../lib/widget-access.js";
 
 const Calendar = ({
   onDateSelected,
   layout = "square",
-  hasLicense = false,
+  accessGranted = false,
   allowThemeEditor = true,
   showBranding,
+  purchaseUrl = DEFAULT_WIDGET_PURCHASE_URL,
 }: {
   onDateSelected?: (event: React.MouseEvent, date: Date) => void;
   layout?: WidgetLayout;
-  hasLicense?: boolean;
+  accessGranted?: boolean;
   allowThemeEditor?: boolean;
   showBranding?: boolean;
+  purchaseUrl?: string;
 }) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const { theme } = useWidgetTheme();
-  const effectiveTheme = hasLicense ? theme : DEFAULT_WIDGET_THEME;
-  const shouldShowBranding = showBranding ?? !hasLicense;
+  const effectiveTheme = accessGranted ? theme : DEFAULT_WIDGET_THEME;
+  const editorMode = getThemeEditorMode(accessGranted, allowThemeEditor);
+  const shouldRenderBranding = shouldShowWidgetBranding(
+    accessGranted,
+    showBranding
+  );
 
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
@@ -114,7 +125,7 @@ const Calendar = ({
         backgroundColor: effectiveTheme.color2,
       }}
     >
-      <WidgetThemeEditor hasLicense={hasLicense && allowThemeEditor} />
+      <WidgetThemeEditor mode={editorMode} purchaseUrl={purchaseUrl} />
       <CalendarHeader
         currentMonth={currentMonth}
         currentYear={currentYear}
@@ -129,7 +140,7 @@ const Calendar = ({
         `}
         className={cn(
           "grid w-full min-h-0 grid-cols-7 gap-[2px] rounded-[8px]   box-border",
-          shouldShowBranding ? "flex-[1_1_0]" : "flex-1"
+          shouldRenderBranding ? "flex-[1_1_0]" : "flex-1"
         )}
         style={{
           borderColor: withOpacity(effectiveTheme.color1, 0.12),
@@ -184,9 +195,7 @@ const Calendar = ({
           </Day>
         ))}
       </div>
-      {shouldShowBranding && (
-        <WidgetFooter theme={effectiveTheme} />
-      )}
+      {shouldRenderBranding && <WidgetFooter theme={effectiveTheme} />}
     </SquareContainer>
   );
 };

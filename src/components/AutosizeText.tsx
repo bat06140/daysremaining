@@ -1,8 +1,8 @@
 import { CSSProperties, forwardRef, useRef } from "react";
 import { css, SerializedStyles } from "@emotion/react";
-import { cn } from "@/lib/utils";
+import { cn } from "../lib/utils.js";
 import { ClassValue } from "clsx";
-import { useAutoFitFontSize } from "@/hook/useAutoFitFontSize";
+import { useAutoFitFontSize } from "../hook/useAutoFitFontSize.js";
 
 export interface AutosizeTextProps {
   wrapperTw?: ClassValue;

@@ -1,7 +1,7 @@
 import { CSSProperties, MouseEventHandler, useRef } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "../lib/utils.js";
 import { ClassValue } from "clsx";
-import { useAutoFitFontSize } from "@/hook/useAutoFitFontSize";
+import { useAutoFitFontSize } from "../hook/useAutoFitFontSize.js";
 
 export const AutosizeButton = ({
   overrideTw,

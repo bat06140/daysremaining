@@ -1,11 +1,12 @@
 import { useRef, useState } from "react";
-import { cn } from "@/lib/utils";
-import { WidgetKey } from "@/lib/view-config";
+import { cn } from "../lib/utils.js";
+import { WidgetKey } from "../lib/view-config.js";
 import {
   getPanelRatioFromPointer,
   PANEL_MIN_RATIO,
-} from "@/lib/showcase-layout";
-import { renderWidget, widgetOptions } from "./widget-registry";
+} from "../lib/showcase-layout.js";
+import { DEFAULT_WIDGET_PURCHASE_URL } from "../lib/widget-access.js";
+import { renderWidget, widgetOptions } from "./widget-registry.js";
 
 type ShowcasePanelKey = "primary" | "secondary" | "tertiary";
 
@@ -19,11 +20,13 @@ const panelOrder: ShowcasePanelKey[] = ["primary", "secondary", "tertiary"];
 
 const ShowcasePanel = ({
   widget,
-  hasLicense,
+  accessGranted,
+  purchaseUrl,
   onWidgetChange,
 }: {
   widget: WidgetKey;
-  hasLicense: boolean;
+  accessGranted: boolean;
+  purchaseUrl: string;
   onWidgetChange: (widget: WidgetKey) => void;
 }) => {
   return (
@@ -43,13 +46,19 @@ const ShowcasePanel = ({
         </select>
       </div>
       <div className="h-full w-full min-h-0 flex-1 p-2 pt-[2px] md:p-3 md:pt-[2px]">
-        {renderWidget({ widget, layout: "full", hasLicense })}
+        {renderWidget({ widget, layout: "full", accessGranted, purchaseUrl })}
       </div>
     </section>
   );
 };
 
-const WidgetShowcase = ({ hasLicense = false }: { hasLicense?: boolean }) => {
+const WidgetShowcase = ({
+  accessGranted = false,
+  purchaseUrl = DEFAULT_WIDGET_PURCHASE_URL,
+}: {
+  accessGranted?: boolean;
+  purchaseUrl?: string;
+}) => {
   const showcaseRef = useRef<HTMLDivElement>(null);
   const rightColumnRef = useRef<HTMLDivElement>(null);
   const [leftRatio, setLeftRatio] = useState(0.58);
@@ -134,7 +143,8 @@ const WidgetShowcase = ({ hasLicense = false }: { hasLicense?: boolean }) => {
           <div key={panel} className="min-h-[280px] flex-1">
             <ShowcasePanel
               widget={panelWidgets[panel]}
-              hasLicense={hasLicense}
+              accessGranted={accessGranted}
+              purchaseUrl={purchaseUrl}
               onWidgetChange={(widget) => updatePanel(panel, widget)}
             />
           </div>
@@ -150,7 +160,8 @@ const WidgetShowcase = ({ hasLicense = false }: { hasLicense?: boolean }) => {
       >
         <ShowcasePanel
           widget={panelWidgets.primary}
-          hasLicense={hasLicense}
+          accessGranted={accessGranted}
+          purchaseUrl={purchaseUrl}
           onWidgetChange={(widget) => updatePanel("primary", widget)}
         />
 
@@ -175,7 +186,8 @@ const WidgetShowcase = ({ hasLicense = false }: { hasLicense?: boolean }) => {
         >
           <ShowcasePanel
             widget={panelWidgets.secondary}
-            hasLicense={hasLicense}
+            accessGranted={accessGranted}
+            purchaseUrl={purchaseUrl}
             onWidgetChange={(widget) => updatePanel("secondary", widget)}
           />
 
@@ -193,7 +205,8 @@ const WidgetShowcase = ({ hasLicense = false }: { hasLicense?: boolean }) => {
 
           <ShowcasePanel
             widget={panelWidgets.tertiary}
-            hasLicense={hasLicense}
+            accessGranted={accessGranted}
+            purchaseUrl={purchaseUrl}
             onWidgetChange={(widget) => updatePanel("tertiary", widget)}
           />
         </div>

@@ -1,19 +1,49 @@
 import { useEffect, useRef } from "react";
 import { css } from "@emotion/react";
-import { AutosizeText } from "./AutosizeText";
-import ClickIcon from "../click.svg";
-import { SquareContainer } from "./SquareContainer";
-import { cn } from "@/lib/utils";
-import { WidgetLayout } from "@/lib/view-config";
-import { WidgetFooter } from "./WidgetFooter";
-import { WidgetThemeEditor } from "./WidgetThemeEditor";
-import { useWidgetTheme } from "@/hook/useWidgetTheme";
-import { DEFAULT_WIDGET_THEME } from "@/lib/widget-theme";
+import { AutosizeText } from "./AutosizeText.js";
+import { SquareContainer } from "./SquareContainer.js";
+import { cn } from "../lib/utils.js";
+import { WidgetLayout } from "../lib/view-config.js";
+import { WidgetFooter } from "./WidgetFooter.js";
+import { WidgetThemeEditor } from "./WidgetThemeEditor.js";
+import { useWidgetTheme } from "../hook/useWidgetTheme.js";
+import { DEFAULT_WIDGET_THEME } from "../lib/widget-theme.js";
+import {
+  DEFAULT_WIDGET_PURCHASE_URL,
+  getThemeEditorMode,
+  shouldShowWidgetBranding,
+} from "../lib/widget-access.js";
+
+const ClickIndicator = ({
+  fill,
+  width,
+  height,
+}: {
+  fill: string;
+  width: string;
+  height: string;
+}) => (
+  <svg
+    viewBox="0 0 24 24"
+    width={width}
+    height={height}
+    fill="none"
+    aria-hidden="true"
+  >
+    <path
+      d="M7 12h7M12 7l5 5-5 5"
+      stroke={fill}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
 
 type Props = {
   textContent: string;
   showPop: boolean;
-  hasLicense?: boolean;
+  accessGranted?: boolean;
   allowThemeEditor?: boolean;
   showBranding?: boolean;
   textFontScale?: number;
@@ -21,12 +51,13 @@ type Props = {
   onClickOutside: () => void;
   children: string | JSX.Element | JSX.Element[];
   layout?: WidgetLayout;
+  purchaseUrl?: string;
 };
 
 export const CenteredPopover = ({
   textContent,
   showPop,
-  hasLicense = false,
+  accessGranted = false,
   allowThemeEditor = true,
   showBranding,
   textFontScale = 0.94,
@@ -34,11 +65,16 @@ export const CenteredPopover = ({
   onClickOutside,
   children,
   layout = "square",
+  purchaseUrl = DEFAULT_WIDGET_PURCHASE_URL,
 }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { theme } = useWidgetTheme();
-  const effectiveTheme = hasLicense ? theme : DEFAULT_WIDGET_THEME;
-  const shouldShowBranding = showBranding ?? !hasLicense;
+  const effectiveTheme = accessGranted ? theme : DEFAULT_WIDGET_THEME;
+  const editorMode = getThemeEditorMode(accessGranted, allowThemeEditor);
+  const shouldRenderBranding = shouldShowWidgetBranding(
+    accessGranted,
+    showBranding
+  );
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -64,7 +100,8 @@ export const CenteredPopover = ({
       className="group relative w-full"
     >
       <WidgetThemeEditor
-        hasLicense={hasLicense && allowThemeEditor}
+        mode={editorMode}
+        purchaseUrl={purchaseUrl}
         suspendHoverReveal={showPop}
       />
       <div className="flex h-full w-full flex-col gap-[2px]">
@@ -88,7 +125,7 @@ export const CenteredPopover = ({
           </AutosizeText>
 
           <div className="pointer-events-none absolute bottom-4 left-4 z-10 opacity-90">
-            <ClickIcon
+            <ClickIndicator
               fill={effectiveTheme.color2}
               width={layout === "full" ? "40" : "30"}
               height={layout === "full" ? "40" : "30"}
@@ -128,7 +165,7 @@ export const CenteredPopover = ({
           )}
         </div>
 
-        {shouldShowBranding && (
+        {shouldRenderBranding && (
           <WidgetFooter
             theme={effectiveTheme}
             onClick={(event) => {

@@ -1,8 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Palette, X } from "lucide-react";
+import { ArrowLeft, Lock, Palette, X } from "lucide-react";
 import { RgbaColor, RgbaColorPicker } from "react-colorful";
-import { cn } from "@/lib/utils";
-import { useWidgetTheme } from "@/hook/useWidgetTheme";
+import { cn } from "../lib/utils.js";
+import { useWidgetTheme } from "../hook/useWidgetTheme.js";
+import {
+  DEFAULT_WIDGET_PURCHASE_URL,
+  type ThemeEditorMode,
+} from "../lib/widget-access.js";
 import {
   formatRgbaString,
   formatThemeInputValue,
@@ -11,7 +15,7 @@ import {
   RgbaColorValue,
   ThemeInputMode,
   WidgetTheme,
-} from "@/lib/widget-theme";
+} from "../lib/widget-theme.js";
 
 type ThemeColorKey = keyof WidgetTheme;
 
@@ -54,11 +58,13 @@ const ThemeColorField = ({
 };
 
 export const WidgetThemeEditor = ({
-  hasLicense,
+  mode,
+  purchaseUrl = DEFAULT_WIDGET_PURCHASE_URL,
   suspendHoverReveal = false,
   paletteButtonClassName,
 }: {
-  hasLicense: boolean;
+  mode: ThemeEditorMode;
+  purchaseUrl?: string;
   suspendHoverReveal?: boolean;
   paletteButtonClassName?: string;
 }) => {
@@ -95,9 +101,11 @@ export const WidgetThemeEditor = ({
     );
   }, [draftTheme, inputMode, resolvedActiveColorKey]);
 
-  if (!hasLicense) {
+  if (mode === "hidden") {
     return null;
   }
+
+  const isLocked = mode === "locked";
 
   const updateThemeColor = (nextColor: string) => {
     setDraftTheme((current) => ({
@@ -130,34 +138,65 @@ export const WidgetThemeEditor = ({
     setIsOpen(false);
   };
 
+  const paletteContents = (
+    <>
+      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-notion-black backdrop-blur">
+        <Palette size={14} />
+      </span>
+      {isLocked && (
+        <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-white text-notion-black shadow-[0_1px_3px_rgba(0,0,0,0.2)]">
+          <Lock size={9} />
+        </span>
+      )}
+    </>
+  );
+
   return (
     <>
       <div
         className={cn(
-          "pointer-events-none absolute bottom-1 right-1 z-20 opacity-0 transition",
-          !suspendHoverReveal && "group-hover:opacity-100",
+          "pointer-events-none absolute bottom-1 right-1 z-20 transition",
+          isLocked ? "opacity-100" : "opacity-0",
+          !isLocked && !suspendHoverReveal && "group-hover:opacity-100",
           isOpen && "opacity-100",
           paletteButtonClassName
         )}
       >
-        <button
-          type="button"
-          className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full border border-white/40 bg-[conic-gradient(from_180deg_at_50%_50%,_#ff8a8a,_#ffd36f,_#8fe3ff,_#d29bff,_#ff8a8a)] shadow-[0_10px_24px_rgba(0,0,0,0.22)] transition hover:scale-[1.02]"
-          aria-label="Customize widget colors"
-          onClick={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            setDraftTheme(theme);
-            setActiveColorKey(null);
-            setInputMode("hex");
-            setInputDraft(formatThemeInputValue(theme.color1, "hex"));
-            setIsOpen(true);
-          }}
-        >
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-notion-black backdrop-blur">
-            <Palette size={14} />
-          </span>
-        </button>
+        {isLocked ? (
+          <a
+            href={purchaseUrl}
+            target="_blank"
+            rel="noreferrer"
+            className={cn(
+              "pointer-events-auto relative flex h-9 w-9 items-center justify-center rounded-full border border-white/40 bg-[conic-gradient(from_180deg_at_50%_50%,_#ff8a8a,_#ffd36f,_#8fe3ff,_#d29bff,_#ff8a8a)] shadow-[0_10px_24px_rgba(0,0,0,0.22)] transition hover:scale-[1.02]",
+              "ring-1 ring-black/10"
+            )}
+            aria-label="Unlock premium theme customization"
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
+          >
+            {paletteContents}
+          </a>
+        ) : (
+          <button
+            type="button"
+            className="pointer-events-auto relative flex h-9 w-9 items-center justify-center rounded-full border border-white/40 bg-[conic-gradient(from_180deg_at_50%_50%,_#ff8a8a,_#ffd36f,_#8fe3ff,_#d29bff,_#ff8a8a)] shadow-[0_10px_24px_rgba(0,0,0,0.22)] transition hover:scale-[1.02]"
+            aria-label="Customize widget colors"
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+
+              setDraftTheme(theme);
+              setActiveColorKey(null);
+              setInputMode("hex");
+              setInputDraft(formatThemeInputValue(theme.color1, "hex"));
+              setIsOpen(true);
+            }}
+          >
+            {paletteContents}
+          </button>
+        )}
       </div>
 
       {isOpen && (

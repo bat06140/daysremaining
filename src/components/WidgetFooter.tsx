@@ -1,4 +1,4 @@
-import { getContrastTextColor, WidgetTheme } from "@/lib/widget-theme";
+import { getContrastTextColor, WidgetTheme } from "../lib/widget-theme.js";
 
 type WidgetFooterProps = {
   href?: string;

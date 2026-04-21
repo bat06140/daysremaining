@@ -1,7 +1,8 @@
-import Calendar from "./Calendar";
-import { DaysRemaining } from "./DaysRemaining";
-import FlipClock from "./FlipClock";
-import { WidgetKey, WidgetLayout } from "@/lib/view-config";
+import Calendar from "./Calendar.js";
+import { DaysRemaining } from "./DaysRemaining.js";
+import FlipClock from "./FlipClock.js";
+import { DEFAULT_WIDGET_PURCHASE_URL } from "../lib/widget-access.js";
+import { WidgetKey, WidgetLayout } from "../lib/view-config.js";
 
 export const widgetOptions: Array<{ value: WidgetKey; label: string }> = [
   { value: "calendar", label: "Calendar" },
@@ -12,45 +13,51 @@ export const widgetOptions: Array<{ value: WidgetKey; label: string }> = [
 export const renderWidget = ({
   widget,
   layout,
-  hasLicense = false,
+  accessGranted = false,
   allowThemeEditor = true,
+  purchaseUrl = DEFAULT_WIDGET_PURCHASE_URL,
 }: {
   widget: WidgetKey;
   layout: WidgetLayout;
-  hasLicense?: boolean;
+  accessGranted?: boolean;
   allowThemeEditor?: boolean;
+  purchaseUrl?: string;
 }) => {
   switch (widget) {
     case "calendar":
       return (
         <Calendar
           layout={layout}
-          hasLicense={hasLicense}
+          accessGranted={accessGranted}
           allowThemeEditor={allowThemeEditor}
+          purchaseUrl={purchaseUrl}
         />
       );
     case "daysRemaining":
       return (
         <DaysRemaining
           layout={layout}
-          hasLicense={hasLicense}
+          accessGranted={accessGranted}
           allowThemeEditor={allowThemeEditor}
+          purchaseUrl={purchaseUrl}
         />
       );
     case "clock":
       return (
         <FlipClock
           layout={layout}
-          hasLicense={hasLicense}
+          accessGranted={accessGranted}
           allowThemeEditor={allowThemeEditor}
+          purchaseUrl={purchaseUrl}
         />
       );
     default:
       return (
         <Calendar
           layout={layout}
-          hasLicense={hasLicense}
+          accessGranted={accessGranted}
           allowThemeEditor={allowThemeEditor}
+          purchaseUrl={purchaseUrl}
         />
       );
   }

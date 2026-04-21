@@ -1,23 +1,25 @@
 import { useEffect, useState, MouseEvent } from "react";
-import "../index.css";
-import { CenteredPopover } from "./CenteredPopover";
-import Calendar from "./Calendar";
-import { WidgetLayout } from "@/lib/view-config";
+import { CenteredPopover } from "./CenteredPopover.js";
+import Calendar from "./Calendar.js";
+import { WidgetLayout } from "../lib/view-config.js";
 import {
   formatDaysRemainingLabel,
   getDaysRemainingFontScale,
-} from "@/lib/days-remaining";
+} from "../lib/days-remaining.js";
+import { DEFAULT_WIDGET_PURCHASE_URL } from "../lib/widget-access.js";
 
 export const DaysRemaining = ({
   layout = "square",
-  hasLicense = false,
+  accessGranted = false,
   allowThemeEditor = true,
   showBranding,
+  purchaseUrl = DEFAULT_WIDGET_PURCHASE_URL,
 }: {
   layout?: WidgetLayout;
-  hasLicense?: boolean;
+  accessGranted?: boolean;
   allowThemeEditor?: boolean;
   showBranding?: boolean;
+  purchaseUrl?: string;
 }) => {
   const [showPop, setShowPop] = useState(false);
   const [targetDate, setTargetDate] = useState<Date>();
@@ -82,9 +84,10 @@ export const DaysRemaining = ({
       textFontScale={getDaysRemainingFontScale(label)}
       showPop={showPop}
       layout={layout}
-      hasLicense={hasLicense}
+      accessGranted={accessGranted}
       allowThemeEditor={allowThemeEditor}
       showBranding={showBranding}
+      purchaseUrl={purchaseUrl}
       onPopTrigger={(event: React.MouseEvent) => {
         event.preventDefault();
         if (!showPop) {
@@ -95,9 +98,10 @@ export const DaysRemaining = ({
     >
       <Calendar
         layout="full"
-        hasLicense={hasLicense}
+        accessGranted={accessGranted}
         allowThemeEditor={false}
         showBranding={false}
+        purchaseUrl={purchaseUrl}
         onDateSelected={onDateSelected}
       />
     </CenteredPopover>

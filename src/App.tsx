@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import WidgetShowcase from "./components/WidgetShowcase";
 import { renderWidget } from "./components/widget-registry";
 import { WidgetThemeProvider } from "./context/WidgetThemeContext";
-import { getInitialAppState } from "./lib/widget-runtime";
+import { getInitialAppState, readWidgetRuntime } from "./lib/widget-runtime";
 
 function App() {
   const [state, setState] = useState(() =>
@@ -23,6 +23,7 @@ function App() {
   }, []);
 
   const { view, accessGranted } = state;
+  const { purchaseUrl } = readWidgetRuntime(window);
 
   return (
     <WidgetThemeProvider>
@@ -32,13 +33,17 @@ function App() {
             ? "flex h-screen w-screen items-center justify-center bg-[#f3efe7] p-4"
             : "h-screen w-screen"
         }
-      >
+        >
         {view.kind === "showcase"
-          ? <WidgetShowcase hasLicense={accessGranted} />
+          ? <WidgetShowcase
+              accessGranted={accessGranted}
+              purchaseUrl={purchaseUrl}
+            />
           : renderWidget({
               widget: view.widget,
               layout: view.layout,
-              hasLicense: accessGranted,
+              accessGranted,
+              purchaseUrl,
             })}
       </div>
     </WidgetThemeProvider>

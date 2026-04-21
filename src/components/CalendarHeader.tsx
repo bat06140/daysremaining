@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { css } from "@emotion/react";
 import { ChevronDown } from "lucide-react";
-import { AutosizeButton } from "./AutosizeButton";
-import { AutosizeText } from "./AutosizeText";
-import { getSharedFittingFontSize } from "@/lib/font-fit";
-import { WidgetTheme } from "@/lib/widget-theme";
+import { AutosizeButton } from "./AutosizeButton.js";
+import { AutosizeText } from "./AutosizeText.js";
+import { getSharedFittingFontSize } from "../lib/font-fit.js";
+import { WidgetTheme } from "../lib/widget-theme.js";
 
 type HeaderLabelKey = "month" | "year";
 type HeaderMenuKey = HeaderLabelKey | null;

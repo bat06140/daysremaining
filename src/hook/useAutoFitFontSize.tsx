@@ -3,7 +3,7 @@ import {
   findLargestFittingFontSize,
   scaleFontSize,
   stabilizeFontSize,
-} from "@/lib/font-fit";
+} from "../lib/font-fit.js";
 
 interface UseAutoFitFontSizeOptions {
   maxHeightRatio?: number;

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
-import { cn } from "@/lib/utils";
-import { WidgetLayout } from "@/lib/view-config";
+import { cn } from "../lib/utils.js";
+import { WidgetLayout } from "../lib/view-config.js";
 
 interface SquareContainerProps {
   className?: string;
