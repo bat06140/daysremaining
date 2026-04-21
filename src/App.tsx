@@ -2,16 +2,16 @@ import { useEffect, useState } from "react";
 import WidgetShowcase from "./components/WidgetShowcase";
 import { renderWidget } from "./components/widget-registry";
 import { WidgetThemeProvider } from "./context/WidgetThemeContext";
-import { AppView, resolveAppView } from "./lib/view-config";
+import { getInitialAppState } from "./lib/widget-runtime";
 
 function App() {
-  const [view, setView] = useState<AppView | null>(null);
+  const [state, setState] = useState(() =>
+    getInitialAppState(window, import.meta.env.VITE_COMPONENT)
+  );
 
   useEffect(() => {
     const updateView = () => {
-      setView(
-        resolveAppView(window.location.search, import.meta.env.VITE_COMPONENT)
-      );
+      setState(getInitialAppState(window, import.meta.env.VITE_COMPONENT));
     };
 
     updateView();
@@ -22,9 +22,7 @@ function App() {
     };
   }, []);
 
-  if (!view) {
-    return "Loading...";
-  }
+  const { view, accessGranted } = state;
 
   return (
     <WidgetThemeProvider>
@@ -36,11 +34,11 @@ function App() {
         }
       >
         {view.kind === "showcase"
-          ? <WidgetShowcase hasLicense={view.hasLicense} />
+          ? <WidgetShowcase hasLicense={accessGranted} />
           : renderWidget({
               widget: view.widget,
               layout: view.layout,
-              hasLicense: view.hasLicense,
+              hasLicense: accessGranted,
             })}
       </div>
     </WidgetThemeProvider>

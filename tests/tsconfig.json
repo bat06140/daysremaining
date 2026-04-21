@@ -11,7 +11,9 @@
   },
   "include": [
     "../tests/**/*.ts",
+    "../custom.d.ts",
     "../src/lib/view-config.ts",
+    "../src/lib/widget-runtime.ts",
     "../src/lib/showcase-layout.ts",
     "../src/lib/font-fit.ts",
     "../src/lib/widget-theme.ts",

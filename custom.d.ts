@@ -7,3 +7,12 @@ declare module "*.svg" {
 }
 
 /// <reference types="vite/client" />
+
+interface Window {
+  __WIDGET_RUNTIME__?: {
+    widget?: string;
+    accessGranted?: boolean;
+    reason?: string;
+    purchaseUrl?: string;
+  };
+}
