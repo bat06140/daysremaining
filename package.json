@@ -9,16 +9,16 @@
     }
   },
   "scripts": {
-    "dev": "vite",
+    "dev": "turbo run dev",
     "dev:calendar": "VITE_COMPONENT=calendar vite",
     "dev:days-remaining": "VITE_COMPONENT=daysRemaining vite",
     "dev:clock": "VITE_COMPONENT=clock vite",
-    "build": "tsc && vite build",
+    "build": "turbo run build",
     "build:calendar": "VITE_COMPONENT=calendar tsc && vite build",
     "build:days-remaining": "VITE_COMPONENT=daysRemaining tsc && vite build",
-    "test": "tsc -p tests/tsconfig.json && node --test .test-dist/tests/**/*.test.js && node --test tests/server/**/*.test.js",
+    "test": "turbo run test && node --test tests/server/**/*.test.js",
     "test:server": "node --test tests/server/**/*.test.js",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "lint": "turbo run lint",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -52,6 +52,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.6",
     "postcss": "^8.4.38",
+    "turbo": "^2.0.0",
     "tailwindcss": "^4.1.12",
     "typescript": "^5.2.2",
     "vite": "^5.2.0",
