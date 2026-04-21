@@ -1,0 +1,21 @@
+{
+  "name": "@repo/widget-server",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "tsc -p tests/tsconfig.json && node --test .test-dist/tests/**/*.test.js"
+  },
+  "dependencies": {
+    "@repo/shared": "workspace:*",
+    "dotenv": "^16.6.1",
+    "express": "^5.2.1",
+    "mysql2": "^3.22.2",
+    "node-cache": "^5.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.2",
+    "typescript": "^5.2.2"
+  }
+}
