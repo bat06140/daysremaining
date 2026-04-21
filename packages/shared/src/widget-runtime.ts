@@ -1,4 +1,4 @@
-import type { WidgetKey } from "./widget-types";
+import type { WidgetKey } from "./widget-types.js";
 
 export type WidgetRuntime = {
   widget?: WidgetKey;
