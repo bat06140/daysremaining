@@ -11,16 +11,16 @@
   },
   "scripts": {
     "dev": "turbo run dev",
-    "dev:calendar": "VITE_COMPONENT=calendar vite",
-    "dev:days-remaining": "VITE_COMPONENT=daysRemaining vite",
-    "dev:clock": "VITE_COMPONENT=clock vite",
+    "dev:calendar": "VITE_COMPONENT=calendar pnpm --filter @repo/widget-client run dev",
+    "dev:days-remaining": "VITE_COMPONENT=daysRemaining pnpm --filter @repo/widget-client run dev",
+    "dev:clock": "VITE_COMPONENT=clock pnpm --filter @repo/widget-client run dev",
     "build": "turbo run build",
-    "build:calendar": "VITE_COMPONENT=calendar tsc && vite build",
-    "build:days-remaining": "VITE_COMPONENT=daysRemaining tsc && vite build",
-    "test": "turbo run test && node --test tests/server/**/*.test.js",
-    "test:server": "node --test tests/server/**/*.test.js",
+    "build:calendar": "VITE_COMPONENT=calendar pnpm --filter @repo/widget-client run build",
+    "build:days-remaining": "VITE_COMPONENT=daysRemaining pnpm --filter @repo/widget-client run build",
+    "test": "turbo run test",
+    "test:server": "pnpm --filter @repo/widget-server run test",
     "lint": "turbo run lint",
-    "preview": "vite preview"
+    "preview": "pnpm --filter @repo/widget-client run preview"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",
