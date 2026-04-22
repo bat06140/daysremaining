@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Lock, Palette, X } from "lucide-react";
 import { RgbaColor, RgbaColorPicker } from "react-colorful";
 import { cn } from "../lib/utils.js";
 import { useWidgetTheme } from "../hook/useWidgetTheme.js";
+import { getBrowserLocale, getTranslationSet } from "../lib/locale.js";
 import {
   DEFAULT_WIDGET_PURCHASE_URL,
   type ThemeEditorMode,
@@ -78,6 +79,9 @@ export const WidgetThemeEditor = ({
   const [inputDraft, setInputDraft] = useState(
     formatThemeInputValue(theme.color1, "hex")
   );
+  const pickerContainerRef = useRef<HTMLDivElement>(null);
+  const locale = getBrowserLocale();
+  const translations = getTranslationSet(locale);
 
   const resolvedActiveColorKey = activeColorKey ?? "color1";
   const activeRgba = useMemo(
@@ -100,6 +104,34 @@ export const WidgetThemeEditor = ({
       formatThemeInputValue(draftTheme[resolvedActiveColorKey], inputMode)
     );
   }, [draftTheme, inputMode, resolvedActiveColorKey]);
+
+  useEffect(() => {
+    if (!isOpen || activeColorKey == null) {
+      return;
+    }
+
+    const pickerControls =
+      pickerContainerRef.current?.querySelectorAll<HTMLElement>(
+        ".react-colorful__interactive"
+      ) ?? [];
+
+    if (pickerControls.length < 3) {
+      return;
+    }
+
+    pickerControls[0].setAttribute(
+      "aria-label",
+      translations.themeEditor.pickerColorLabel
+    );
+    pickerControls[1].setAttribute(
+      "aria-label",
+      translations.themeEditor.pickerHueLabel
+    );
+    pickerControls[2].setAttribute(
+      "aria-label",
+      translations.themeEditor.pickerOpacityLabel
+    );
+  }, [activeColorKey, isOpen, translations]);
 
   if (mode === "hidden") {
     return null;
@@ -171,7 +203,7 @@ export const WidgetThemeEditor = ({
               "pointer-events-auto relative flex h-9 w-9 items-center justify-center rounded-full border border-white/40 bg-[conic-gradient(from_180deg_at_50%_50%,_#ff8a8a,_#ffd36f,_#8fe3ff,_#d29bff,_#ff8a8a)] shadow-[0_10px_24px_rgba(0,0,0,0.22)] transition hover:scale-[1.02]",
               "ring-1 ring-black/10"
             )}
-            aria-label="Unlock premium theme customization"
+            aria-label={translations.themeEditor.unlockAriaLabel}
             onClick={(event) => {
               event.stopPropagation();
             }}
@@ -182,7 +214,7 @@ export const WidgetThemeEditor = ({
           <button
             type="button"
             className="pointer-events-auto relative flex h-9 w-9 items-center justify-center rounded-full border border-white/40 bg-[conic-gradient(from_180deg_at_50%_50%,_#ff8a8a,_#ffd36f,_#8fe3ff,_#d29bff,_#ff8a8a)] shadow-[0_10px_24px_rgba(0,0,0,0.22)] transition hover:scale-[1.02]"
-            aria-label="Customize widget colors"
+            aria-label={translations.themeEditor.openAriaLabel}
             onClick={(event) => {
               event.preventDefault();
               event.stopPropagation();
@@ -221,20 +253,22 @@ export const WidgetThemeEditor = ({
                   <button
                     type="button"
                     className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border border-black/10 text-black/65"
-                    aria-label="Back to color list"
+                    aria-label={translations.themeEditor.backAriaLabel}
                     onClick={() => setActiveColorKey(null)}
                   >
                     <ArrowLeft size={16} />
                   </button>
                 )}
                 <div className="min-w-0">
-                  <h2 className="font-sans text-xl leading-none">Choisir une couleur</h2>
+                  <h2 className="font-sans text-xl leading-none">
+                    {translations.themeEditor.title}
+                  </h2>
                 </div>
               </div>
               <button
                 type="button"
                 className="flex h-8 w-8 items-center justify-center rounded-[8px] border border-black/10 text-black/65"
-                aria-label="Close theme editor"
+                aria-label={translations.themeEditor.closeAriaLabel}
                 onClick={closeEditor}
               >
                 <X size={16} />
@@ -244,29 +278,32 @@ export const WidgetThemeEditor = ({
             {activeColorKey == null ? (
               <div className="grid gap-[2px]">
                 <p className="px-[2px] text-xs text-black/60">
-                  Choisis une couleur pour ouvrir son panneau d’édition.
+                  {translations.themeEditor.instructions}
                 </p>
                 <ThemeColorField
-                  label="Color 1"
+                  label={translations.themeEditor.color1}
                   colorValue={draftTheme.color1}
                   onActivate={() => setActiveColorKey("color1")}
                 />
                 <ThemeColorField
-                  label="Color 2"
+                  label={translations.themeEditor.color2}
                   colorValue={draftTheme.color2}
                   onActivate={() => setActiveColorKey("color2")}
                 />
               </div>
             ) : (
               <div className="grid gap-[2px]">
-                {/* <div className="rounded-[8px] border border-black/10 bg-[#f6f2ea] p-[2px]"> */}
-                  <div className="widget-color-picker">
+                <div className="grid gap-[2px]">
+                  <div className="px-[2px] text-[10px] uppercase tracking-[0.16em] text-black/45">
+                    {translations.themeEditor.pickerSummary}
+                  </div>
+                  <div ref={pickerContainerRef} className="widget-color-picker">
                     <RgbaColorPicker
                       color={activeRgba}
                       onChange={updateActiveColorFromRgba}
                       style={{ width: "100%" }}
                     />
-                  {/* </div> */}
+                  </div>
                 </div>
 
                 <div className="flex rounded-[8px] border border-black/10 bg-[#f6f2ea] p-[2px]">
@@ -324,7 +361,7 @@ export const WidgetThemeEditor = ({
                 className="rounded-[8px] border border-black/10 px-[6px] py-[2px] text-sm font-medium text-notion-black"
                 onClick={closeEditor}
               >
-                Annuler
+                {translations.themeEditor.cancel}
               </button>
               <button
                 type="button"
@@ -334,7 +371,7 @@ export const WidgetThemeEditor = ({
                   setIsOpen(false);
                 }}
               >
-                Valider
+                {translations.themeEditor.save}
               </button>
             </div>
           </div>

@@ -4,6 +4,7 @@ import { ChevronDown } from "lucide-react";
 import { AutosizeButton } from "./AutosizeButton.js";
 import { AutosizeText } from "./AutosizeText.js";
 import { getSharedFittingFontSize } from "../lib/font-fit.js";
+import { getBrowserLocale, getCalendarMonthLabels } from "../lib/locale.js";
 import { WidgetTheme } from "../lib/widget-theme.js";
 
 type HeaderLabelKey = "month" | "year";
@@ -79,6 +80,7 @@ const CalendarHeader = ({
     month: undefined,
     year: undefined,
   });
+  const locale = getBrowserLocale();
 
   useEffect(() => {
     if (!openMenu) {
@@ -133,20 +135,7 @@ const CalendarHeader = ({
     };
   }, []);
 
-  const months = [
-    "Janvier",
-    "Février",
-    "Mars",
-    "Avril",
-    "Mai",
-    "Juin",
-    "Juillet",
-    "Août",
-    "Septembre",
-    "Octobre",
-    "Novembre",
-    "Décembre",
-  ];
+  const months = getCalendarMonthLabels(locale);
   const years = Array.from(
     { length: 21 },
     (_, index) => currentYear - 10 + index

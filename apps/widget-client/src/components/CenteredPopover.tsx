@@ -13,6 +13,7 @@ import {
   getThemeEditorMode,
   shouldShowWidgetBranding,
 } from "../lib/widget-access.js";
+import { getBrowserLocale, getTranslationSet } from "../lib/locale.js";
 
 const ClickIndicator = ({
   fill,
@@ -75,6 +76,8 @@ export const CenteredPopover = ({
     accessGranted,
     showBranding
   );
+  const locale = getBrowserLocale();
+  const translations = getTranslationSet(locale);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -154,7 +157,7 @@ export const CenteredPopover = ({
                   event.stopPropagation();
                   onClickOutside();
                 }}
-                aria-label="Close popover"
+                aria-label={translations.popover.closeAriaLabel}
               >
                 ×
               </button>

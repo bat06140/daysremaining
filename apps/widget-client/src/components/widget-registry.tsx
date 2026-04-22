@@ -2,13 +2,20 @@ import Calendar from "./Calendar.js";
 import { DaysRemaining } from "./DaysRemaining.js";
 import FlipClock from "./FlipClock.js";
 import { DEFAULT_WIDGET_PURCHASE_URL } from "../lib/widget-access.js";
+import { AppLocale, getTranslationSet } from "../lib/locale.js";
 import { WidgetKey, WidgetLayout } from "../lib/view-config.js";
 
-export const widgetOptions: Array<{ value: WidgetKey; label: string }> = [
-  { value: "calendar", label: "Calendar" },
-  { value: "daysRemaining", label: "Days Remaining" },
-  { value: "clock", label: "Clock" },
-];
+export const getWidgetOptions = (
+  locale: AppLocale
+): Array<{ value: WidgetKey; label: string }> => {
+  const translations = getTranslationSet(locale);
+
+  return [
+    { value: "calendar", label: translations.widgetOptions.calendar },
+    { value: "daysRemaining", label: translations.widgetOptions.daysRemaining },
+    { value: "clock", label: translations.widgetOptions.clock },
+  ];
+};
 
 export const renderWidget = ({
   widget,

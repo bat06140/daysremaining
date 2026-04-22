@@ -14,6 +14,7 @@ import {
   getThemeEditorMode,
   shouldShowWidgetBranding,
 } from "../lib/widget-access.js";
+import { formatClockMonthLabel, getBrowserLocale } from "../lib/locale.js";
 
 type BottomTileKey = "day" | "month" | "year";
 
@@ -80,6 +81,7 @@ const FlipClock = ({
     accessGranted,
     showBranding
   );
+  const locale = getBrowserLocale();
   const [now, setNow] = useState(() => new Date());
   const [bottomMeasuredSizes, setBottomMeasuredSizes] = useState<
     Record<BottomTileKey, number | undefined>
@@ -102,10 +104,7 @@ const FlipClock = ({
   const hours = now.getHours();
   const minutes = now.getMinutes();
   const day = now.getDate();
-  const month = now
-    .toLocaleString("fr-FR", { month: "short" })
-    .replace(".", "")
-    .toUpperCase();
+  const month = formatClockMonthLabel(now, locale);
   const year = now.getFullYear();
   const sharedBottomFontSize = getSharedFittingFontSize([
     bottomMeasuredSizes.day,

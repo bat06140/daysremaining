@@ -6,7 +6,8 @@ import {
   PANEL_MIN_RATIO,
 } from "../lib/showcase-layout.js";
 import { DEFAULT_WIDGET_PURCHASE_URL } from "../lib/widget-access.js";
-import { renderWidget, widgetOptions } from "./widget-registry.js";
+import { getBrowserLocale, getTranslationSet } from "../lib/locale.js";
+import { getWidgetOptions, renderWidget } from "./widget-registry.js";
 
 type ShowcasePanelKey = "primary" | "secondary" | "tertiary";
 
@@ -29,6 +30,10 @@ const ShowcasePanel = ({
   purchaseUrl: string;
   onWidgetChange: (widget: WidgetKey) => void;
 }) => {
+  const locale = getBrowserLocale();
+  const translations = getTranslationSet(locale);
+  const widgetOptions = getWidgetOptions(locale);
+
   return (
     <section className="flex min-h-0 flex-col overflow-hidden rounded-[24px] border border-black/10 bg-[#ddd6c8] shadow-[0_18px_40px_rgba(55,53,47,0.12)]">
       <div className="flex justify-end px-3 pt-3">
@@ -36,7 +41,7 @@ const ShowcasePanel = ({
           value={widget}
           onChange={(event) => onWidgetChange(event.target.value as WidgetKey)}
           className="rounded-full border border-black/10 bg-white/90 px-3 py-2 text-sm font-medium text-notion-black shadow-sm backdrop-blur"
-          aria-label="Choose the widget shown in this panel"
+          aria-label={translations.showcase.selectAriaLabel}
         >
           {widgetOptions.map((option) => (
             <option key={option.value} value={option.value}>
@@ -61,6 +66,8 @@ const WidgetShowcase = ({
 }) => {
   const showcaseRef = useRef<HTMLDivElement>(null);
   const rightColumnRef = useRef<HTMLDivElement>(null);
+  const locale = getBrowserLocale();
+  const translations = getTranslationSet(locale);
   const [leftRatio, setLeftRatio] = useState(0.58);
   const [topRatio, setTopRatio] = useState(0.5);
   const [panelWidgets, setPanelWidgets] =
@@ -126,15 +133,14 @@ const WidgetShowcase = ({
       <div className="mb-4 flex items-end justify-between gap-4">
         <div>
           <p className="text-sm uppercase tracking-[0.24em] text-black/45">
-            Widget Showcase
+            {translations.showcase.eyebrow}
           </p>
           <h1 className="font-sans text-4xl text-notion-black md:text-6xl">
-            Three panels, all configurable
+            {translations.showcase.title}
           </h1>
         </div>
         <p className="hidden max-w-sm text-right text-sm text-black/60 md:block">
-          Drag the separators to resize the grid. Each panel can display any of
-          the three widgets.
+          {translations.showcase.description}
         </p>
       </div>
 
@@ -174,7 +180,7 @@ const WidgetShowcase = ({
               ? "opacity-60"
               : "opacity-100"
           )}
-          aria-label="Resize the left and right showcase panels"
+          aria-label={translations.showcase.resizeColumnsAriaLabel}
         />
 
         <div
@@ -200,7 +206,7 @@ const WidgetShowcase = ({
                 ? "opacity-60"
                 : "opacity-100"
             )}
-            aria-label="Resize the top and bottom panels on the right"
+            aria-label={translations.showcase.resizeRowsAriaLabel}
           />
 
           <ShowcasePanel

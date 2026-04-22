@@ -14,6 +14,7 @@ import {
   getThemeEditorMode,
   shouldShowWidgetBranding,
 } from "../lib/widget-access.js";
+import { getBrowserLocale, getCalendarWeekdayLabels } from "../lib/locale.js";
 
 const Calendar = ({
   onDateSelected,
@@ -38,11 +39,12 @@ const Calendar = ({
     accessGranted,
     showBranding
   );
+  const locale = getBrowserLocale();
 
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
 
-  const daysOfWeek = ["LUN", "MAR", "MER", "JEU", "VEN", "SAM", "DIM"];
+  const daysOfWeek = getCalendarWeekdayLabels(locale);
 
   function generateCalendar(month: number, year: number) {
     setCurrentMonth(month);
