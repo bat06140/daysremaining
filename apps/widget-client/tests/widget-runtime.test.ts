@@ -75,7 +75,7 @@ test("getWidgetSelection falls back to the env widget when runtime widget is abs
 
 test("getInitialAppState uses the runtime widget on the first render", () => {
   const state = getInitialAppState({
-    location: { search: "" },
+    location: { search: "", pathname: "/" },
     __WIDGET_RUNTIME__: {
       widget: "clock",
       accessGranted: true,
@@ -91,5 +91,24 @@ test("getInitialAppState uses the runtime widget on the first render", () => {
       layout: "square",
     },
     accessGranted: true,
+  });
+});
+
+test("getInitialAppState uses the pathname widget when runtime and query are absent", () => {
+  const state = getInitialAppState({
+    location: { search: "", pathname: "/clock" },
+    __WIDGET_RUNTIME__: {
+      accessGranted: false,
+      purchaseUrl: DEFAULT_WIDGET_PURCHASE_URL,
+    },
+  } as unknown as Window);
+
+  assert.deepEqual(state, {
+    view: {
+      kind: "widget",
+      widget: "clock",
+      layout: "square",
+    },
+    accessGranted: false,
   });
 });

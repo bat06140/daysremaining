@@ -40,6 +40,22 @@ test("resolveAppView uses the server runtime widget when the url does not specif
   });
 });
 
+test("resolveAppView uses the widget pathname when the query does not specify one", () => {
+  assert.deepEqual(resolveAppView("", undefined, "/clock"), {
+    kind: "widget",
+    widget: "clock",
+    layout: "square",
+  });
+});
+
+test("resolveAppView maps days-remaining pathname to daysRemaining", () => {
+  assert.deepEqual(resolveAppView("", undefined, "/days-remaining"), {
+    kind: "widget",
+    widget: "daysRemaining",
+    layout: "square",
+  });
+});
+
 test("resolveAppView falls back to calendar for unknown widget and layout values", () => {
   assert.deepEqual(resolveAppView("?widget=unknown&layout=wide"), {
     kind: "widget",

@@ -68,7 +68,8 @@ export function getInitialAppState(
   return {
     view: resolveAppView(
       currentWindow.location.search,
-      getWidgetSelection(runtime, envWidget)
+      getWidgetSelection(runtime, envWidget),
+      currentWindow.location.pathname
     ),
     accessGranted: runtime.accessGranted,
   };
