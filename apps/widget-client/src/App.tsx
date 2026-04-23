@@ -27,13 +27,10 @@ function App() {
 
   return (
     <WidgetThemeProvider>
-      <div
-        className={
-          view.kind === "widget" && view.layout === "square"
-            ? "flex h-screen w-screen items-center justify-center p-4"
-            : "h-screen w-screen"
-        }
-      >
+      <div className={view.kind === "widget" && view.layout === "square"
+          ? "flex h-screen w-screen items-center justify-center p-4"
+          : "h-screen w-screen"
+        }>
         {view.kind === "showcase" ? (
           <WidgetShowcase
             accessGranted={accessGranted}
