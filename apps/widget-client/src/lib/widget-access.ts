@@ -1,4 +1,4 @@
-export type ThemeEditorMode = "premium" | "locked" | "hidden";
+export type ThemeEditorMode = "premium" | "freemium" | "locked" | "hidden";
 
 export { DEFAULT_WIDGET_PURCHASE_URL } from "@repo/shared";
 
@@ -10,7 +10,7 @@ export const getThemeEditorMode = (
     return "hidden";
   }
 
-  return accessGranted ? "premium" : "locked";
+  return accessGranted ? "premium" : "freemium";
 };
 
 export const shouldShowWidgetBranding = (

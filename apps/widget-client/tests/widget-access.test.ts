@@ -53,8 +53,8 @@ test("licensed widgets use premium mode when the editor is allowed", () => {
   assert.equal(getThemeEditorMode(true, true), "premium");
 });
 
-test("locked widgets keep the palette visible when the editor is allowed", () => {
-  assert.equal(getThemeEditorMode(false, true), "locked");
+test("freemium widgets keep the palette visible when the editor is allowed", () => {
+  assert.equal(getThemeEditorMode(false, true), "freemium");
 });
 
 test("widgets without editor permission hide the palette entirely", () => {

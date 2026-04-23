@@ -123,9 +123,20 @@ layer(base);
     inset: 0;
   }
 
-  .widget-color-picker .react-colorful__hue {
+  .widget-color-picker .react-colorful__pointer {
+    width: 18px;
+    height: 18px;
   }
 
-  .widget-color-picker .react-colorful__alpha {
+  .widget-color-picker .react-colorful__hue-pointer,
+  .widget-color-picker .react-colorful__alpha-pointer {
+    width: 16px;
+    height: 16px;
+  }
+
+  .widget-color-picker .react-colorful__pointer-fill {
+    box-shadow:
+      0 0 0 2px rgba(255, 255, 255, 0.96),
+      0 1px 4px rgba(0, 0, 0, 0.22);
   }
 }

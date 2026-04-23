@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Lock, Palette, X } from "lucide-react";
+import { ArrowLeft, Lock, Palette } from "lucide-react";
 import { RgbaColor, RgbaColorPicker } from "react-colorful";
 import { cn } from "../lib/utils.js";
 import { useWidgetTheme } from "../hook/useWidgetTheme.js";
@@ -26,34 +26,82 @@ const ThemeColorField = ({
   label,
   colorValue,
   onActivate,
+  variant = "editable",
+  purchaseUrl,
+  lockLabel,
 }: {
   label: string;
   colorValue: string;
   onActivate: () => void;
+  variant?: "editable" | "locked";
+  purchaseUrl?: string;
+  lockLabel?: string;
 }) => {
   const rgba = parseWidgetThemeColor(colorValue) ?? defaultRgba;
+  const isLockedVariant = variant === "locked";
 
-  return (
-    <button
-      type="button"
-      className="flex min-w-0 items-center justify-between gap-[2px] rounded-[8px] border border-black/10 bg-white/90 px-[2px] py-[2px] text-left transition hover:border-black/20"
-      onClick={onActivate}
-    >
-      <div className="min-w-0">
-        <div className="text-[10px] uppercase tracking-[0.16em] text-black/45">
-          {label}
+  const content = (
+    <>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-[6px]">
+          <div className="text-[10px] uppercase tracking-[0.16em] text-black/42">
+            {label}
+          </div>
+          {isLockedVariant && (
+            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-black/8 bg-white/80 text-black/55 shadow-[0_1px_2px_rgba(0,0,0,0.08)]">
+              <Lock size={10} />
+            </span>
+          )}
         </div>
-        <div className="mt-[2px] truncate font-medium text-notion-black">
+        <div className="mt-[5px] truncate text-[14px] font-semibold leading-none text-notion-black">
           {formatThemeInputValue(colorValue, "hex")}
         </div>
-        <div className="truncate text-[10px] text-black/55">
+        <div className="mt-[4px] truncate text-[10px] text-black/58">
           {formatThemeInputValue(colorValue, "rgba")}
         </div>
       </div>
-      <span
-        className="h-8 w-8 shrink-0 rounded-[8px] border border-black/10 shadow-inner"
-        style={{ background: formatRgbaString(rgba) }}
-      ></span>
+      <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] border border-black/10 bg-white/75 shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]">
+        <span
+          className="absolute inset-[3px] rounded-[8px] border border-black/6"
+          style={{ background: formatRgbaString(rgba) }}
+        ></span>
+      </span>
+    </>
+  );
+
+  const baseClassName = cn(
+    "group flex min-w-0 items-center justify-between gap-[10px] rounded-[10px] border px-[10px] py-[9px] text-left transition",
+    isLockedVariant
+      ? "border-black/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,241,236,0.96))] shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_8px_18px_rgba(55,53,47,0.08)] hover:border-black/20"
+      : "border-black/10 bg-white/92 hover:border-black/20",
+  );
+
+  if (isLockedVariant && purchaseUrl) {
+    return (
+      <a
+        data-theme-editor-card="locked"
+        href={purchaseUrl}
+        target="_blank"
+        rel="noreferrer"
+        aria-label={lockLabel}
+        className={baseClassName}
+        onClick={(event) => {
+          event.stopPropagation();
+        }}
+      >
+        {content}
+      </a>
+    );
+  }
+
+  return (
+    <button
+      data-theme-editor-card="editable"
+      type="button"
+      className={baseClassName}
+      onClick={onActivate}
+    >
+      {content}
     </button>
   );
 };
@@ -63,21 +111,24 @@ export const WidgetThemeEditor = ({
   purchaseUrl = DEFAULT_WIDGET_PURCHASE_URL,
   suspendHoverReveal = false,
   paletteButtonClassName,
+  initialOpen = false,
+  initialActiveColorKey = null,
 }: {
   mode: ThemeEditorMode;
   purchaseUrl?: string;
   suspendHoverReveal?: boolean;
   paletteButtonClassName?: string;
+  initialOpen?: boolean;
+  initialActiveColorKey?: ThemeColorKey | null;
 }) => {
   const { theme, saveTheme } = useWidgetTheme();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(initialOpen);
   const [activeColorKey, setActiveColorKey] = useState<ThemeColorKey | null>(
-    null
+    initialActiveColorKey,
   );
   const [inputMode, setInputMode] = useState<ThemeInputMode>("hex");
-  const [draftTheme, setDraftTheme] = useState<WidgetTheme>(theme);
   const [inputDraft, setInputDraft] = useState(
-    formatThemeInputValue(theme.color1, "hex")
+    formatThemeInputValue(theme.color1, "hex"),
   );
   const pickerContainerRef = useRef<HTMLDivElement>(null);
   const locale = getBrowserLocale();
@@ -85,14 +136,12 @@ export const WidgetThemeEditor = ({
 
   const resolvedActiveColorKey = activeColorKey ?? "color1";
   const activeRgba = useMemo(
-    () =>
-      parseWidgetThemeColor(draftTheme[resolvedActiveColorKey]) ?? defaultRgba,
-    [draftTheme, resolvedActiveColorKey]
+    () => parseWidgetThemeColor(theme[resolvedActiveColorKey]) ?? defaultRgba,
+    [theme, resolvedActiveColorKey],
   );
 
   useEffect(() => {
     if (!isOpen) {
-      setDraftTheme(theme);
       setActiveColorKey(null);
       setInputMode("hex");
       setInputDraft(formatThemeInputValue(theme.color1, "hex"));
@@ -101,9 +150,9 @@ export const WidgetThemeEditor = ({
 
   useEffect(() => {
     setInputDraft(
-      formatThemeInputValue(draftTheme[resolvedActiveColorKey], inputMode)
+      formatThemeInputValue(theme[resolvedActiveColorKey], inputMode),
     );
-  }, [draftTheme, inputMode, resolvedActiveColorKey]);
+  }, [theme, inputMode, resolvedActiveColorKey]);
 
   useEffect(() => {
     if (!isOpen || activeColorKey == null) {
@@ -112,7 +161,7 @@ export const WidgetThemeEditor = ({
 
     const pickerControls =
       pickerContainerRef.current?.querySelectorAll<HTMLElement>(
-        ".react-colorful__interactive"
+        ".react-colorful__interactive",
       ) ?? [];
 
     if (pickerControls.length < 3) {
@@ -121,15 +170,15 @@ export const WidgetThemeEditor = ({
 
     pickerControls[0].setAttribute(
       "aria-label",
-      translations.themeEditor.pickerColorLabel
+      translations.themeEditor.pickerColorLabel,
     );
     pickerControls[1].setAttribute(
       "aria-label",
-      translations.themeEditor.pickerHueLabel
+      translations.themeEditor.pickerHueLabel,
     );
     pickerControls[2].setAttribute(
       "aria-label",
-      translations.themeEditor.pickerOpacityLabel
+      translations.themeEditor.pickerOpacityLabel,
     );
   }, [activeColorKey, isOpen, translations]);
 
@@ -138,12 +187,15 @@ export const WidgetThemeEditor = ({
   }
 
   const isLocked = mode === "locked";
+  const isFreemium = mode === "freemium";
+  const canEditColors = mode === "premium";
+  const showDetailStep = canEditColors && activeColorKey != null;
 
   const updateThemeColor = (nextColor: string) => {
-    setDraftTheme((current) => ({
-      ...current,
+    saveTheme({
+      ...theme,
       [resolvedActiveColorKey]: nextColor,
-    }));
+    });
   };
 
   const updateActiveColorFromRgba = (value: RgbaColor) => {
@@ -163,7 +215,6 @@ export const WidgetThemeEditor = ({
   };
 
   const closeEditor = () => {
-    setDraftTheme(theme);
     setActiveColorKey(null);
     setInputMode("hex");
     setInputDraft(formatThemeInputValue(theme.color1, "hex"));
@@ -191,7 +242,7 @@ export const WidgetThemeEditor = ({
           isLocked ? "opacity-100" : "opacity-0",
           !isLocked && !suspendHoverReveal && "group-hover:opacity-100",
           isOpen && "opacity-100",
-          paletteButtonClassName
+          paletteButtonClassName,
         )}
       >
         {isLocked ? (
@@ -201,7 +252,7 @@ export const WidgetThemeEditor = ({
             rel="noreferrer"
             className={cn(
               "pointer-events-auto relative flex h-9 w-9 items-center justify-center rounded-full border border-white/40 bg-[conic-gradient(from_180deg_at_50%_50%,_#ff8a8a,_#ffd36f,_#8fe3ff,_#d29bff,_#ff8a8a)] shadow-[0_10px_24px_rgba(0,0,0,0.22)] transition hover:scale-[1.02]",
-              "ring-1 ring-black/10"
+              "ring-1 ring-black/10",
             )}
             aria-label={translations.themeEditor.unlockAriaLabel}
             onClick={(event) => {
@@ -218,8 +269,6 @@ export const WidgetThemeEditor = ({
             onClick={(event) => {
               event.preventDefault();
               event.stopPropagation();
-
-              setDraftTheme(theme);
               setActiveColorKey(null);
               setInputMode("hex");
               setInputDraft(formatThemeInputValue(theme.color1, "hex"));
@@ -233,7 +282,8 @@ export const WidgetThemeEditor = ({
 
       {isOpen && (
         <div
-          className="absolute top-1/2 bottom-1/2 translate-y-1/2  inset-0 z-30 flex items-center justify-center rounded-[inherit] bg-black/32"
+          data-theme-editor-overlay="true"
+          className="absolute inset-0 z-30 rounded-[inherit] bg-black/12 animate-in fade-in duration-200"
           onClick={(event) => {
             event.preventDefault();
             event.stopPropagation();
@@ -241,107 +291,90 @@ export const WidgetThemeEditor = ({
           }}
         >
           <div
-            className="w-full max-w-[300px] rounded-[8px] bg-white p-[8px] text-notion-black shadow-[0_20px_60px_rgba(0,0,0,0.25)]"
+            data-theme-editor-panel="true"
+            className={cn(
+              "absolute bottom-1 right-1 origin-bottom-right overflow-hidden rounded-[12px] bg-white/98 p-[8px] text-notion-black shadow-[0_20px_60px_rgba(0,0,0,0.25)] ring-1 ring-black/10 animate-in fade-in zoom-in-95 slide-in-from-bottom-1 slide-in-from-right-1 duration-200 transition-[width,height,opacity,transform] ease-out",
+              !showDetailStep
+                ? "h-[170px] w-[180px] scale-100 opacity-100"
+                : "h-[308px] w-[224px] scale-100 opacity-100",
+            )}
+            style={{
+              maxWidth: "calc(100% - 8px)",
+              maxHeight: "calc(100% - 8px)",
+            }}
             onClick={(event) => {
               event.preventDefault();
               event.stopPropagation();
             }}
           >
-            <div className="mb-[2px] flex items-center justify-between gap-[2px]">
-              <div className="flex min-w-0 flex-1 items-center gap-[8px]">
-                {activeColorKey != null && (
+            {!showDetailStep ? (
+              <div className="grid h-full content-start gap-[8px] transition-opacity duration-150">
+                <ThemeColorField
+                  label={translations.themeEditor.color1}
+                  colorValue={theme.color1}
+                  onActivate={() => setActiveColorKey("color1")}
+                  variant={isFreemium ? "locked" : "editable"}
+                  purchaseUrl={isFreemium ? purchaseUrl : undefined}
+                  lockLabel={translations.themeEditor.unlockAriaLabel}
+                />
+                <ThemeColorField
+                  label={translations.themeEditor.color2}
+                  colorValue={theme.color2}
+                  onActivate={() => setActiveColorKey("color2")}
+                  variant={isFreemium ? "locked" : "editable"}
+                  purchaseUrl={isFreemium ? purchaseUrl : undefined}
+                  lockLabel={translations.themeEditor.unlockAriaLabel}
+                />
+              </div>
+            ) : (
+              <div className="grid h-full content-start gap-[8px] transition-opacity duration-150">
+                <div className="flex items-center gap-[4px]">
                   <button
                     type="button"
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border border-black/10 text-black/65"
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] border border-black/10 text-black/65 transition hover:border-black/20"
                     aria-label={translations.themeEditor.backAriaLabel}
                     onClick={() => setActiveColorKey(null)}
                   >
                     <ArrowLeft size={16} />
                   </button>
-                )}
-                <div className="min-w-0">
-                  <h2 className="font-sans text-xl leading-none">
-                    {translations.themeEditor.title}
-                  </h2>
-                </div>
-              </div>
-              <button
-                type="button"
-                className="flex h-8 w-8 items-center justify-center rounded-[8px] border border-black/10 text-black/65"
-                aria-label={translations.themeEditor.closeAriaLabel}
-                onClick={closeEditor}
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            {activeColorKey == null ? (
-              <div className="grid gap-[2px]">
-                <p className="px-[2px] text-xs text-black/60">
-                  {translations.themeEditor.instructions}
-                </p>
-                <ThemeColorField
-                  label={translations.themeEditor.color1}
-                  colorValue={draftTheme.color1}
-                  onActivate={() => setActiveColorKey("color1")}
-                />
-                <ThemeColorField
-                  label={translations.themeEditor.color2}
-                  colorValue={draftTheme.color2}
-                  onActivate={() => setActiveColorKey("color2")}
-                />
-              </div>
-            ) : (
-              <div className="grid gap-[2px]">
-                <div className="grid gap-[2px]">
-                  <div ref={pickerContainerRef} className="widget-color-picker">
-                    <RgbaColorPicker
-                      color={activeRgba}
-                      onChange={updateActiveColorFromRgba}
-                      style={{ width: "100%" }}
-                    />
+                  <div className="flex min-w-0 flex-1 items-center gap-[4px]">
+                    <div className="flex h-9 min-w-0 flex-1 rounded-[8px] border border-black/10 bg-white/90 p-[2px]">
+                      <button
+                        type="button"
+                        className={cn(
+                          "h-full flex-1 rounded-[6px] px-[6px] py-[2px] text-xs font-medium transition",
+                          inputMode === "hex"
+                            ? "bg-notion-black text-white"
+                            : "text-notion-black/70",
+                        )}
+                        onClick={() => setInputMode("hex")}
+                      >
+                        HEX
+                      </button>
+                      <button
+                        type="button"
+                        className={cn(
+                          "h-full flex-1 rounded-[6px] px-[6px] py-[2px] text-xs font-medium transition",
+                          inputMode === "rgba"
+                            ? "bg-notion-black text-white"
+                            : "text-notion-black/70",
+                        )}
+                        onClick={() => setInputMode("rgba")}
+                      >
+                        RGBA
+                      </button>
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex rounded-[8px] border border-black/10 bg-white/90 p-[2px]">
-                  <button
-                    type="button"
-                    className={cn(
-                      "flex-1 rounded-[8px] px-[2px] py-[2px] text-sm font-medium transition",
-                      inputMode === "hex"
-                        ? "bg-notion-black text-white"
-                        : "text-notion-black/70"
-                    )}
-                    onClick={() => setInputMode("hex")}
-                  >
-                    HEX
-                  </button>
-                  <button
-                    type="button"
-                    className={cn(
-                      "flex-1 rounded-[8px] px-[2px] py-[2px] text-sm font-medium transition",
-                      inputMode === "rgba"
-                        ? "bg-notion-black text-white"
-                        : "text-notion-black/70"
-                    )}
-                    onClick={() => setInputMode("rgba")}
-                  >
-                    RGBA
-                  </button>
-                </div>
-
                 <label className="grid gap-[2px]">
-                  <span className="text-[10px] uppercase tracking-[0.16em] text-black/45">
-                    {inputMode.toUpperCase()}
-                  </span>
                   <input
                     value={inputDraft}
-                    className="rounded-[8px] border border-black/10 bg-white px-[2px] py-[2px] text-sm"
+                    className="rounded-[8px] border border-black/10 bg-white px-[8px] py-[8px] text-sm"
                     onChange={(event) => {
                       const nextValue = event.target.value;
                       setInputDraft(nextValue);
-                      const normalized =
-                        normalizeThemeStorageColor(nextValue);
+                      const normalized = normalizeThemeStorageColor(nextValue);
 
                       if (normalized) {
                         updateThemeColor(normalized);
@@ -349,28 +382,16 @@ export const WidgetThemeEditor = ({
                     }}
                   />
                 </label>
+
+                <div ref={pickerContainerRef} className="widget-color-picker">
+                  <RgbaColorPicker
+                    color={activeRgba}
+                    onChange={updateActiveColorFromRgba}
+                    style={{ width: "100%" }}
+                  />
+                </div>
               </div>
             )}
-
-            <div className="mt-[2px] flex justify-end gap-[2px]">
-              <button
-                type="button"
-                className="rounded-[8px] border border-black/10 px-[6px] py-[2px] text-sm font-medium text-notion-black"
-                onClick={closeEditor}
-              >
-                {translations.themeEditor.cancel}
-              </button>
-              <button
-                type="button"
-                className="rounded-[8px] bg-notion-black px-[6px] py-[2px] text-sm font-medium text-white"
-                onClick={() => {
-                  saveTheme(draftTheme);
-                  setIsOpen(false);
-                }}
-              >
-                {translations.themeEditor.save}
-              </button>
-            </div>
           </div>
         </div>
       )}
