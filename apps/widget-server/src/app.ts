@@ -2,6 +2,7 @@ import { createRequire } from "node:module";
 import { createWidgetsRouter } from "./routes/widgets.js";
 import { injectWidgetRuntime } from "./html/render-widget-page.js";
 import { checkAccess as checkAccessDefault } from "./services/license-service.js";
+import { type DebugLogger } from "./logging/license-debug.js";
 
 const require = createRequire(import.meta.url);
 const express = require("express") as {
@@ -15,6 +16,8 @@ export type CreateAppOptions = {
   templatePath?: string;
   staticDir?: string;
   purchaseUrl?: string;
+  debugLicenses?: boolean;
+  logger?: DebugLogger;
 };
 
 export function createApp({
@@ -23,6 +26,8 @@ export function createApp({
   templatePath,
   staticDir,
   purchaseUrl,
+  debugLicenses,
+  logger,
 }: CreateAppOptions = {}) {
   const app = express();
 
@@ -36,6 +41,8 @@ export function createApp({
       htmlTemplate,
       templatePath,
       purchaseUrl,
+      debugLicenses,
+      logger,
     })
   );
 

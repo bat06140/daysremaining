@@ -6,7 +6,7 @@ import { getInitialAppState, readWidgetRuntime } from "./lib/widget-runtime";
 
 function App() {
   const [state, setState] = useState(() =>
-    getInitialAppState(window, import.meta.env.VITE_COMPONENT)
+    getInitialAppState(window, import.meta.env.VITE_COMPONENT),
   );
 
   useEffect(() => {
@@ -30,21 +30,23 @@ function App() {
       <div
         className={
           view.kind === "widget" && view.layout === "square"
-            ? "flex h-screen w-screen items-center justify-center bg-[#f3efe7] p-4"
+            ? "flex h-screen w-screen items-center justify-center p-4"
             : "h-screen w-screen"
         }
-        >
-        {view.kind === "showcase"
-          ? <WidgetShowcase
-              accessGranted={accessGranted}
-              purchaseUrl={purchaseUrl}
-            />
-          : renderWidget({
-              widget: view.widget,
-              layout: view.layout,
-              accessGranted,
-              purchaseUrl,
-            })}
+      >
+        {view.kind === "showcase" ? (
+          <WidgetShowcase
+            accessGranted={accessGranted}
+            purchaseUrl={purchaseUrl}
+          />
+        ) : (
+          renderWidget({
+            widget: view.widget,
+            layout: view.layout,
+            accessGranted,
+            purchaseUrl,
+          })
+        )}
       </div>
     </WidgetThemeProvider>
   );

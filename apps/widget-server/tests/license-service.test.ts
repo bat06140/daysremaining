@@ -136,6 +136,7 @@ test("checkAccess fails closed when expires_at is invalid", async () => {
 });
 
 test("checkAccess returns service unavailable when the database fetch fails", async () => {
+  const logs: string[] = [];
   const service = createLicenseService({
     cacheTtlSeconds: 3600,
     fetchRows: async () => {
@@ -143,16 +144,26 @@ test("checkAccess returns service unavailable when the database fetch fails", as
     },
     decryptLicenseKey: () => "IGNORED",
     now: () => new Date("2026-04-21T10:00:00Z"),
+    debugLicenses: true,
+    logger: {
+      info: (message: string) => logs.push(`info:${message}`),
+      warn: (message: string) => logs.push(`warn:${message}`),
+      error: (message: string) => logs.push(`error:${message}`),
+    },
   });
 
   assert.deepEqual(await service.checkAccess("ANY-KEY"), {
     access: false,
     reason: "Service indisponible",
   });
+  assert.match(logs.join("\n"), /refresh failed/i);
+  assert.match(logs.join("\n"), /sha256:/i);
+  assert.doesNotMatch(logs.join("\n"), /ANY-KEY/);
 });
 
 test("checkAccess skips rows that fail decryption and caches the first result", async () => {
   let fetchCount = 0;
+  const logs: string[] = [];
 
   const service = createLicenseService({
     cacheTtlSeconds: 3600,
@@ -169,12 +180,22 @@ test("checkAccess skips rows that fail decryption and caches the first result", 
         throw new Error("bad row");
       })(),
     now: () => new Date("2026-04-21T10:00:00Z"),
+    debugLicenses: true,
+    logger: {
+      info: (message: string) => logs.push(`info:${message}`),
+      warn: (message: string) => logs.push(`warn:${message}`),
+      error: (message: string) => logs.push(`error:${message}`),
+    },
   });
 
   await service.checkAccess("VALID-KEY");
   await service.checkAccess("VALID-KEY");
 
   assert.equal(fetchCount, 1);
+  assert.match(logs.join("\n"), /rows=4/);
+  assert.match(logs.join("\n"), /indexed=3/);
+  assert.match(logs.join("\n"), /decryptFailures=1/);
+  assert.match(logs.join("\n"), /cache hit/i);
 });
 
 test("checkAccess falls back to the last good snapshot when refresh fails later", async (t) => {

@@ -6,6 +6,12 @@ import {
 } from "@repo/shared";
 import { createTemplateLoader, renderWidgetPage } from "../html/render-widget-page.js";
 import type { LicenseAccessResult } from "../services/license-service.js";
+import {
+  createDebugLogger,
+  fingerprintLicense,
+  isLicenseDebugEnabled,
+  type DebugLogger,
+} from "../logging/license-debug.js";
 
 const require = createRequire(import.meta.url);
 const { Router } = require("express") as {
@@ -35,6 +41,8 @@ export type WidgetsRouterOptions = {
   htmlTemplate?: string;
   templatePath?: string;
   purchaseUrl?: string;
+  debugLicenses?: boolean;
+  logger?: DebugLogger;
 };
 
 export function createWidgetsRouter({
@@ -42,14 +50,20 @@ export function createWidgetsRouter({
   htmlTemplate,
   templatePath,
   purchaseUrl = DEFAULT_WIDGET_PURCHASE_URL,
+  debugLicenses = isLicenseDebugEnabled(),
+  logger,
 }: WidgetsRouterOptions) {
   const router = Router();
   const loadTemplate = createTemplateLoader({ htmlTemplate, templatePath });
+  const debugLogger = createDebugLogger(logger);
 
   for (const [routePath, widget] of WIDGET_ROUTES) {
     router.get(routePath, async (req: any, res: any) => {
+      const license = normalizeQueryValue(req.query.license);
+      const licenseFingerprint = fingerprintLicense(license);
+
       try {
-        const access = await checkAccess(normalizeQueryValue(req.query.license));
+        const access = await checkAccess(license);
         const runtime: WidgetRuntime = {
           widget,
           accessGranted: access.access === true,
@@ -57,13 +71,25 @@ export function createWidgetsRouter({
           ...(typeof access.reason === "string" ? { reason: access.reason } : {}),
         };
 
+        if (debugLicenses) {
+          debugLogger.info(
+            `[license-debug] route widget=${widget} path=${routePath} license=${licenseFingerprint} decision=${access.access ? "granted" : "denied"} reason="${access.access ? "ok" : access.reason}"`
+          );
+        }
+
         res.type("html").send(
           await renderWidgetPage({
             loadTemplate,
             runtime,
           })
         );
-      } catch {
+      } catch (error) {
+        if (debugLicenses) {
+          const message = error instanceof Error ? error.message : "unknown";
+          debugLogger.error(
+            `[license-debug] route failure widget=${widget} path=${routePath} license=${licenseFingerprint} error="${message}"`
+          );
+        }
         res.status(503).type("html").send(
           "<!DOCTYPE html><html><body><h1>Service indisponible</h1></body></html>"
         );

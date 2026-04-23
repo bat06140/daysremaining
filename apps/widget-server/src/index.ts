@@ -1,17 +1,83 @@
 import "dotenv/config";
+import { existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { pathToFileURL } from "node:url";
+import path from "node:path";
+import {
+  createDebugLogger,
+  isLicenseDebugEnabled,
+  logStartupDiagnostics,
+} from "./logging/license-debug.js";
 import { createApp, type CreateAppOptions } from "./app.js";
+
+function resolvePackageRoot(fromDir: string) {
+  let currentDir = fromDir;
+
+  while (true) {
+    if (existsSync(path.join(currentDir, "package.json"))) {
+      return currentDir;
+    }
+
+    const parentDir = path.dirname(currentDir);
+    if (parentDir === currentDir) {
+      throw new Error("Unable to resolve widget-server package root");
+    }
+
+    currentDir = parentDir;
+  }
+}
+
+export function resolveWidgetAssetPaths({
+  templatePath = process.env.WIDGET_TEMPLATE_PATH,
+  staticDir = process.env.WIDGET_STATIC_DIR,
+}: {
+  templatePath?: string;
+  staticDir?: string;
+} = {}) {
+  const serverDir = path.dirname(fileURLToPath(import.meta.url));
+  const packageRoot = resolvePackageRoot(serverDir);
+  const defaultStaticDir = path.resolve(packageRoot, "../widget-client/dist");
+  const resolveAssetPath = (value: string) =>
+    path.isAbsolute(value) ? value : path.resolve(packageRoot, value);
+
+  return {
+    templatePath:
+      templatePath && templatePath.length > 0
+        ? resolveAssetPath(templatePath)
+        : path.join(defaultStaticDir, "index.html"),
+    staticDir:
+      staticDir && staticDir.length > 0
+        ? resolveAssetPath(staticDir)
+        : defaultStaticDir,
+  };
+}
 
 export async function startServer({
   port = Number(process.env.PORT ?? 3000),
-  templatePath = process.env.WIDGET_TEMPLATE_PATH,
-  staticDir = process.env.WIDGET_STATIC_DIR,
+  templatePath,
+  staticDir,
+  debugLicenses = isLicenseDebugEnabled(),
+  logger,
   ...options
 }: CreateAppOptions & { port?: number } = {}) {
+  const resolvedAssets = resolveWidgetAssetPaths({ templatePath, staticDir });
+  const debugLogger = createDebugLogger(logger);
+
+  if (debugLicenses) {
+    logStartupDiagnostics({
+      logger: debugLogger,
+      port,
+      templatePath: resolvedAssets.templatePath,
+      staticDir: resolvedAssets.staticDir,
+    });
+  }
+
   const app = createApp({
     ...options,
-    templatePath,
-    staticDir,
+    templatePath: resolvedAssets.templatePath,
+    staticDir: resolvedAssets.staticDir,
+    debugLicenses,
+    logger: debugLogger,
   });
 
   return await new Promise<import("node:http").Server>((resolve, reject) => {

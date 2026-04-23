@@ -5,6 +5,9 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "build:watch": "tsc -w -p tsconfig.json --preserveWatchOutput",
+    "dev": "sh -c 'trap \"kill 0\" EXIT; pnpm build && pnpm build:watch & node --watch dist/index.js'",
+    "start": "node dist/index.js",
     "test": "tsc -p tests/tsconfig.json && node --test .test-dist/tests/**/*.test.js"
   },
   "dependencies": {
