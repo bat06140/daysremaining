@@ -52,8 +52,14 @@ export function resolveWidgetAssetPaths({
   };
 }
 
+export function resolveServerPort(
+  env: Record<string, string | undefined> = process.env
+) {
+  return Number(env.PORT ?? 3000);
+}
+
 export async function startServer({
-  port = Number(process.env.PORT ?? 3000),
+  port = resolveServerPort(),
   templatePath,
   staticDir,
   debugLicenses = isLicenseDebugEnabled(),

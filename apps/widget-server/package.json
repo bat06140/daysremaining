@@ -6,9 +6,10 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "build:watch": "tsc -w -p tsconfig.json --preserveWatchOutput",
-    "dev": "sh -c 'trap \"kill 0\" EXIT; pnpm build && pnpm build:watch & node --watch dist/index.js'",
+    "dev": "PORT=3001 tsx watch src/index.ts",
+    "lint": "tsc -p tsconfig.json --noEmit",
     "start": "node dist/index.js",
-    "test": "tsc -p tests/tsconfig.json && node --test .test-dist/tests/**/*.test.js"
+    "test": "rm -rf .test-dist && tsc -p tests/tsconfig.json && node --test .test-dist/tests/**/*.test.js"
   },
   "dependencies": {
     "@repo/shared": "workspace:*",
@@ -19,6 +20,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.14.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.2.2"
   }
 }

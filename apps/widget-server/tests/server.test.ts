@@ -39,70 +39,47 @@ async function withServer(
   }
 }
 
-test("calendar route validates ?license= and injects premium runtime state", async () => {
+test("widget access api returns denied access without leaking the license", async () => {
   let receivedLicense: string | undefined;
   const app = createApp({
     checkAccess: async (license: string | undefined) => {
       receivedLicense = license;
-      return { access: true };
+      return {
+        access: false,
+        reason: "Licence introuvable",
+      };
     },
     htmlTemplate,
   });
 
   await withServer(app, async (baseUrl) => {
-    const response = await fetch(`${baseUrl}/calendar?license=VALID-KEY&layout=full`);
-    const html = await response.text();
+    const response = await fetch(
+      `${baseUrl}/api/widget-access?widget=calendar&license=BAD-KEY`
+    );
+    const payload = await response.json();
 
     assert.equal(response.status, 200);
-    assert.equal(receivedLicense, "VALID-KEY");
-    assert.match(html, /"widget":"calendar"/);
-    assert.match(html, /"accessGranted":true/);
-    assert.doesNotMatch(html, /VALID-KEY/);
+    assert.equal(receivedLicense, "BAD-KEY");
+    assert.deepEqual(payload, {
+      accessGranted: false,
+      purchaseUrl: "https://atomicskills.academy/widgets-notion/",
+      reason: "Licence introuvable",
+    });
   });
 });
 
-test("clock and days-remaining routes inject locked runtime state", async () => {
-  const app = createApp({
-    checkAccess: async (license: string | undefined) => ({
-      access: false,
-      reason: license ? "Licence introuvable" : "Licence manquante",
-    }),
-    htmlTemplate,
-  });
-
-  await withServer(app, async (baseUrl) => {
-    const [clockResponse, daysRemainingResponse] = await Promise.all([
-      fetch(`${baseUrl}/clock?license=UNKNOWN`),
-      fetch(`${baseUrl}/days-remaining`),
-    ]);
-    const clockHtml = await clockResponse.text();
-    const daysRemainingHtml = await daysRemainingResponse.text();
-
-    assert.equal(clockResponse.status, 200);
-    assert.equal(daysRemainingResponse.status, 200);
-    assert.match(clockHtml, /"widget":"clock"/);
-    assert.match(clockHtml, /"accessGranted":false/);
-    assert.match(clockHtml, /"reason":"Licence introuvable"/);
-    assert.match(daysRemainingHtml, /"widget":"daysRemaining"/);
-    assert.match(daysRemainingHtml, /"reason":"Licence manquante"/);
-  });
-});
-
-test("createApp still serves routes when htmlTemplate is injected without template or static paths", async () => {
+test("static shell serves the frontend app for widget routes", async () => {
   const app = createApp({
     checkAccess: async () => ({ access: true }),
     htmlTemplate,
   });
 
   await withServer(app, async (baseUrl) => {
-    const response = await fetch(`${baseUrl}/calendar?license=VALID-KEY`);
-    const html = await response.text();
+    const response = await fetch(`${baseUrl}/calendar?license=BAD-KEY`);
+    const responseHtml = await response.text();
 
     assert.equal(response.status, 200);
-    assert.match(html, /"widget":"calendar"/);
+    assert.match(responseHtml, /<div id="root"><\/div>/);
+    assert.doesNotMatch(responseHtml, /"widget":"calendar"/);
   });
-});
-
-test("createApp requires an explicit template input when no inline htmlTemplate is provided", () => {
-  assert.throws(() => createApp(), /template path is required/i);
 });

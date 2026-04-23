@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "lint": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.node.json --noEmit",
     "preview": "vite preview",
-    "test": "tsc -p tests/tsconfig.json && node --test .test-dist/tests/**/*.test.js"
+    "test": "rm -rf .test-dist && tsc -p tests/tsconfig.json && node --test .test-dist/tests/**/*.test.js"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",
@@ -20,6 +21,7 @@
     "react": "^18.2.0",
     "react-colorful": "^5.6.1",
     "react-dom": "^18.2.0",
+    "react-router-dom": "^7.14.2",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7"
   },

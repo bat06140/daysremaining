@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 import test from "node:test";
-import { resolveWidgetAssetPaths } from "../src/index.js";
+import { resolveServerPort, resolveWidgetAssetPaths } from "../src/index.js";
 
 test("resolveWidgetAssetPaths falls back to the built widget client assets", () => {
   const resolved = resolveWidgetAssetPaths();
@@ -10,4 +10,11 @@ test("resolveWidgetAssetPaths falls back to the built widget client assets", () 
   assert.match(resolved.staticDir, /apps\/widget-client\/dist$/);
   assert.equal(existsSync(resolved.templatePath), true);
   assert.equal(existsSync(resolved.staticDir), true);
+});
+
+test("resolveServerPort prioritizes the standard PORT environment variable", () => {
+  assert.equal(
+    resolveServerPort({ PORT: "3000", WIDGET_DEV_BACKEND_PORT: "3001" }),
+    3000
+  );
 });

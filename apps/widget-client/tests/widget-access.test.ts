@@ -1,9 +1,53 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  DEFAULT_WIDGET_PURCHASE_URL,
+  fetchWidgetAccess,
   getThemeEditorMode,
   shouldShowWidgetBranding,
-} from "../src/lib/widget-access.js";
+} from "../src/lib/widget-access-api.js";
+
+test("fetchWidgetAccess normalizes a denied response", async () => {
+  const access = await fetchWidgetAccess(
+    {
+      widget: "calendar",
+      search: "?license=BAD-KEY",
+    },
+    async (input) => {
+      assert.equal(input, "/api/widget-access?license=BAD-KEY&widget=calendar");
+      return new Response(
+        JSON.stringify({
+          accessGranted: false,
+          purchaseUrl: DEFAULT_WIDGET_PURCHASE_URL,
+          reason: "Licence introuvable",
+        })
+      );
+    }
+  );
+
+  assert.deepEqual(access, {
+    accessGranted: false,
+    purchaseUrl: DEFAULT_WIDGET_PURCHASE_URL,
+    reason: "Licence introuvable",
+  });
+});
+
+test("fetchWidgetAccess falls back to locked mode when the request fails", async () => {
+  const access = await fetchWidgetAccess(
+    {
+      widget: "clock",
+      search: "",
+    },
+    async () => {
+      throw new Error("network down");
+    }
+  );
+
+  assert.deepEqual(access, {
+    accessGranted: false,
+    purchaseUrl: DEFAULT_WIDGET_PURCHASE_URL,
+  });
+});
 
 test("licensed widgets use premium mode when the editor is allowed", () => {
   assert.equal(getThemeEditorMode(true, true), "premium");

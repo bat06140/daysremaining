@@ -35,7 +35,7 @@ const ShowcasePanel = ({
   const widgetOptions = getWidgetOptions(locale);
 
   return (
-    <section className="flex min-h-0 flex-col overflow-hidden rounded-[24px] border border-black/10 bg-[#ddd6c8] shadow-[0_18px_40px_rgba(55,53,47,0.12)]">
+    <section className="flex min-h-0 flex-col overflow-hidden rounded-[24px] border border-black/10 bg-white/72 shadow-[0_18px_40px_rgba(55,53,47,0.12)] backdrop-blur-sm">
       <div className="flex justify-end px-3 pt-3">
         <select
           value={widget}
@@ -129,7 +129,7 @@ const WidgetShowcase = ({
   };
 
   return (
-    <div className="h-full w-full bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.9),_rgba(239,233,223,1)_38%,_rgba(214,203,185,1)_100%)] p-4 md:p-6">
+    <div className="h-full w-full bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.96),_rgba(244,247,250,0.98)_42%,_rgba(228,233,239,1)_100%)] p-4 md:p-6">
       <div className="mb-4 flex items-end justify-between gap-4">
         <div>
           <p className="text-sm uppercase tracking-[0.24em] text-black/45">

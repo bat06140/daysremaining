@@ -1,6 +1,6 @@
+import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
-import { createWidgetsRouter } from "./routes/widgets.js";
-import { injectWidgetRuntime } from "./html/render-widget-page.js";
+import { createWidgetAccessRouter } from "./routes/widget-access.js";
 import { checkAccess as checkAccessDefault } from "./services/license-service.js";
 import { type DebugLogger } from "./logging/license-debug.js";
 
@@ -20,33 +20,50 @@ export type CreateAppOptions = {
   logger?: DebugLogger;
 };
 
+function loadSpaIndex({
+  htmlTemplate,
+  templatePath,
+}: {
+  htmlTemplate?: string;
+  templatePath?: string;
+}) {
+  if (typeof htmlTemplate === "string" && htmlTemplate.length > 0) {
+    return htmlTemplate;
+  }
+
+  if (typeof templatePath === "string" && templatePath.length > 0) {
+    return readFileSync(templatePath, "utf8");
+  }
+
+  return undefined;
+}
+
 export function createApp({
   checkAccess = checkAccessDefault,
   htmlTemplate,
   templatePath,
   staticDir,
   purchaseUrl,
-  debugLicenses,
-  logger,
 }: CreateAppOptions = {}) {
   const app = express();
+  const spaIndex = loadSpaIndex({ htmlTemplate, templatePath });
 
   app.disable("x-powered-by");
   if (typeof staticDir === "string" && staticDir.length > 0) {
     app.use(express.static(staticDir, { index: false }));
   }
   app.use(
-    createWidgetsRouter({
+    createWidgetAccessRouter({
       checkAccess,
-      htmlTemplate,
-      templatePath,
       purchaseUrl,
-      debugLicenses,
-      logger,
     })
   );
 
+  if (typeof spaIndex === "string") {
+    app.get(["/", "/calendar", "/clock", "/days-remaining"], (_req: any, res: any) => {
+      res.type("html").send(spaIndex);
+    });
+  }
+
   return app;
 }
-
-export { injectWidgetRuntime };

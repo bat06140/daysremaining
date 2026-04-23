@@ -7,6 +7,7 @@
   "types": "./src/index.ts",
   "scripts": {
     "build": "pnpm typecheck",
+    "lint": "pnpm typecheck",
     "test": "pnpm verify",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "verify": "pnpm typecheck"

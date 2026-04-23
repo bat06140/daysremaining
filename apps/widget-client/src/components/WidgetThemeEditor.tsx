@@ -36,7 +36,7 @@ const ThemeColorField = ({
   return (
     <button
       type="button"
-      className="flex min-w-0 items-center justify-between gap-[2px] rounded-[8px] border border-black/10 bg-[#f6f2ea] px-[2px] py-[2px] text-left transition hover:border-black/20"
+      className="flex min-w-0 items-center justify-between gap-[2px] rounded-[8px] border border-black/10 bg-white/90 px-[2px] py-[2px] text-left transition hover:border-black/20"
       onClick={onActivate}
     >
       <div className="min-w-0">
@@ -294,9 +294,6 @@ export const WidgetThemeEditor = ({
             ) : (
               <div className="grid gap-[2px]">
                 <div className="grid gap-[2px]">
-                  <div className="px-[2px] text-[10px] uppercase tracking-[0.16em] text-black/45">
-                    {translations.themeEditor.pickerSummary}
-                  </div>
                   <div ref={pickerContainerRef} className="widget-color-picker">
                     <RgbaColorPicker
                       color={activeRgba}
@@ -306,7 +303,7 @@ export const WidgetThemeEditor = ({
                   </div>
                 </div>
 
-                <div className="flex rounded-[8px] border border-black/10 bg-[#f6f2ea] p-[2px]">
+                <div className="flex rounded-[8px] border border-black/10 bg-white/90 p-[2px]">
                   <button
                     type="button"
                     className={cn(
