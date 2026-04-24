@@ -446,7 +446,7 @@ export const WidgetThemeEditor = ({
           <div
             data-theme-editor-panel="true"
             className={cn(
-              "absolute bottom-1 right-1 origin-bottom-right overflow-hidden rounded-[12px] bg-white/98 p-[8px] text-notion-black shadow-[0_20px_60px_rgba(0,0,0,0.25)] ring-1 ring-black/10 animate-in fade-in zoom-in-95 slide-in-from-bottom-1 slide-in-from-right-1 duration-200 transition-[width,height,opacity,transform] ease-out",
+              "absolute bottom-1 right-1 origin-bottom-right overflow-hidden rounded-[12px] bg-white/98 p-[8px] text-notion-black shadow-[0_20px_60px_rgba(0,0,0,0.25)] ring-1 ring-black/10 animate-in fade-in zoom-in-95 slide-in-from-bottom-1 slide-in-from-right-1 duration-200 transition-[width,height,opacity,transform] ease-out overflow-y-scroll",
               !showDetailStep
                 ? "h-[258px] w-[190px] scale-100 opacity-100"
                 : "h-[308px] w-[224px] scale-100 opacity-100",

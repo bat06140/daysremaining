@@ -157,7 +157,7 @@ const CalendarHeader = ({
   return (
     <div
       ref={containerRef}
-      className="relative flex h-1/5 w-full items-center justify-between rounded-[8px] px-3"
+      className="relative flex h-1/6 w-full items-center justify-between rounded-[8px] px-3"
       style={{
         backgroundColor: theme.color1,
         color: textColor,
