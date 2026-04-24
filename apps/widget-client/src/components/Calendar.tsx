@@ -23,6 +23,7 @@ const Calendar = ({
   allowThemeEditor = true,
   showBranding,
   purchaseUrl = DEFAULT_WIDGET_PURCHASE_URL,
+  onLayoutChange,
 }: {
   onDateSelected?: (event: React.MouseEvent, date: Date) => void;
   layout?: WidgetLayout;
@@ -30,6 +31,7 @@ const Calendar = ({
   allowThemeEditor?: boolean;
   showBranding?: boolean;
   purchaseUrl?: string;
+  onLayoutChange?: (layout: WidgetLayout) => void;
 }) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const { theme } = useWidgetTheme();
@@ -127,7 +129,12 @@ const Calendar = ({
         backgroundColor: effectiveTheme.color2,
       }}
     >
-      <WidgetThemeEditor mode={editorMode} purchaseUrl={purchaseUrl} />
+      <WidgetThemeEditor
+        mode={editorMode}
+        purchaseUrl={purchaseUrl}
+        layout={layout}
+        onLayoutChange={onLayoutChange}
+      />
       <CalendarHeader
         currentMonth={currentMonth}
         currentYear={currentYear}

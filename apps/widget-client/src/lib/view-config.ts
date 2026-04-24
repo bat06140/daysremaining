@@ -2,6 +2,7 @@ import type { WidgetKey } from "@repo/shared";
 
 export type { WidgetKey } from "@repo/shared";
 export type WidgetLayout = "square" | "full";
+export const WIDGET_LAYOUT_COOKIE_NAME = "widgetLayout";
 
 export type AppView =
   | {
@@ -26,7 +27,7 @@ function isWidgetKey(value: string | null | undefined): value is WidgetKey {
   );
 }
 
-function isWidgetLayout(
+export function isWidgetLayout(
   value: string | null | undefined
 ): value is WidgetLayout {
   return value === "square" || value === "full";
@@ -47,7 +48,6 @@ export function resolveAppView(
 ): AppView {
   const params = new URLSearchParams(search);
   const requestedWidget = params.get("widget");
-  const requestedLayout = params.get("layout");
   const pathWidget = getPathWidget(pathname);
 
   if (params.get("view") === "showcase") {
@@ -63,13 +63,33 @@ export function resolveAppView(
     : isWidgetKey(envWidget)
       ? envWidget
       : FALLBACK_WIDGET;
-  const layout = isWidgetLayout(requestedLayout)
-    ? requestedLayout
-    : "square";
-
   return {
     kind: "widget",
     widget,
-    layout,
+    layout: "square",
   };
+}
+
+export function resolveWidgetLayoutFromCookie(
+  cookieString: string,
+  accessGranted: boolean
+): WidgetLayout {
+  if (!accessGranted) {
+    return "square";
+  }
+
+  const layout = cookieString
+    .split(";")
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(`${WIDGET_LAYOUT_COOKIE_NAME}=`))
+    ?.slice(WIDGET_LAYOUT_COOKIE_NAME.length + 1);
+
+  return isWidgetLayout(layout) ? layout : "square";
+}
+
+export function buildWidgetLayoutCookie(
+  layout: WidgetLayout,
+  maxAgeSeconds = 60 * 60 * 24 * 365
+): string {
+  return `${WIDGET_LAYOUT_COOKIE_NAME}=${layout}; Path=/; Max-Age=${maxAgeSeconds}; SameSite=Lax`;
 }

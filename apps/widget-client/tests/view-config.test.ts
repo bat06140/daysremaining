@@ -1,6 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { resolveAppView } from "../src/lib/view-config.js";
+import {
+  buildWidgetLayoutCookie,
+  resolveAppView,
+  resolveWidgetLayoutFromCookie,
+} from "../src/lib/view-config.js";
 
 test("resolveAppView uses the selected widget with square layout by default", () => {
   assert.deepEqual(resolveAppView("?widget=clock"), {
@@ -10,11 +14,11 @@ test("resolveAppView uses the selected widget with square layout by default", ()
   });
 });
 
-test("resolveAppView supports full-page widget mode", () => {
+test("resolveAppView ignores the layout query parameter", () => {
   assert.deepEqual(resolveAppView("?widget=daysRemaining&layout=full"), {
     kind: "widget",
     widget: "daysRemaining",
-    layout: "full",
+    layout: "square",
   });
 });
 
@@ -78,4 +82,25 @@ test("resolveAppView ignores the license query param for access", () => {
     widget: "calendar",
     layout: "square",
   });
+});
+
+test("resolveWidgetLayoutFromCookie uses the persisted layout for premium users", () => {
+  assert.equal(
+    resolveWidgetLayoutFromCookie("widgetLayout=full", true),
+    "full"
+  );
+});
+
+test("resolveWidgetLayoutFromCookie ignores persisted layout for freemium users", () => {
+  assert.equal(
+    resolveWidgetLayoutFromCookie("widgetLayout=full", false),
+    "square"
+  );
+});
+
+test("buildWidgetLayoutCookie serializes the selected layout", () => {
+  assert.match(
+    buildWidgetLayoutCookie("full"),
+    /^widgetLayout=full; Path=\/; Max-Age=31536000; SameSite=Lax$/
+  );
 });

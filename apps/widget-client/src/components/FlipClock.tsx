@@ -67,12 +67,14 @@ const FlipClock = ({
   allowThemeEditor = true,
   showBranding,
   purchaseUrl = DEFAULT_WIDGET_PURCHASE_URL,
+  onLayoutChange,
 }: {
   layout?: WidgetLayout;
   accessGranted?: boolean;
   allowThemeEditor?: boolean;
   showBranding?: boolean;
   purchaseUrl?: string;
+  onLayoutChange?: (layout: WidgetLayout) => void;
 }) => {
   const { theme } = useWidgetTheme();
   const effectiveTheme = accessGranted ? theme : DEFAULT_WIDGET_THEME;
@@ -126,7 +128,12 @@ const FlipClock = ({
         layout === "full" && "rounded-[8px] p-1"
       )}
     >
-      <WidgetThemeEditor mode={editorMode} purchaseUrl={purchaseUrl} />
+      <WidgetThemeEditor
+        mode={editorMode}
+        purchaseUrl={purchaseUrl}
+        layout={layout}
+        onLayoutChange={onLayoutChange}
+      />
       <div className="flex h-full w-full min-h-0 flex-col gap-[2px] rounded-[8px] text-white">
         <div className="flex min-h-0 flex-1 flex-col gap-[2px]">
           <div className="flex min-h-0 flex-[7] gap-[2px]">

@@ -37,34 +37,58 @@ test("WidgetThemeEditor renders the locked purchase affordance", () => {
   assert.match(markup, /href="https:\/\/example\.com\/purchase"/);
 });
 
-test("WidgetThemeEditor freemium mode uses a button trigger instead of a direct purchase link", () => {
+test("WidgetThemeEditor freemium mode uses a locked settings button instead of a direct purchase link", () => {
   const markup = renderWithTheme(
     React.createElement(WidgetThemeEditor, {
       mode: "freemium",
       purchaseUrl: "https://example.com/purchase",
+      layout: "square",
+      onLayoutChange: () => undefined,
     })
   );
 
-  assert.match(markup, /aria-label="Customize widget colors"/);
+  assert.match(markup, /aria-label="Open widget settings"/);
+  assert.match(markup, /data-theme-editor-settings-lock="true"/);
   assert.doesNotMatch(markup, /href="https:\/\/example\.com\/purchase"/);
 });
 
-test("WidgetThemeEditor freemium step 1 renders locked premium cards", () => {
+test("WidgetThemeEditor freemium step 1 renders locked premium layout and color controls", () => {
   const markup = renderWithTheme(
     React.createElement(WidgetThemeEditor, {
       mode: "freemium",
       purchaseUrl: "https://example.com/purchase",
       initialOpen: true,
+      layout: "square",
+      onLayoutChange: () => undefined,
     })
   );
 
   assert.match(markup, /href="https:\/\/example\.com\/purchase"/);
+  assert.match(markup, /data-layout-control="locked"/);
   assert.match(markup, /data-theme-editor-card="locked"/);
+  assert.match(markup, /data-theme-editor-swatch-lock="true"/);
   assert.match(markup, /Unlock premium theme customization/);
   assert.doesNotMatch(markup, /aria-label="Back to color list"/);
 });
 
-test("WidgetThemeEditor open state no longer renders modal header or action buttons", () => {
+test("WidgetThemeEditor premium settings show an editable layout control", () => {
+  const markup = renderWithTheme(
+    React.createElement(WidgetThemeEditor, {
+      mode: "premium",
+      purchaseUrl: DEFAULT_WIDGET_PURCHASE_URL,
+      initialOpen: true,
+      layout: "full",
+      onLayoutChange: () => undefined,
+    })
+  );
+
+  assert.match(markup, /data-layout-control="editable"/);
+  assert.match(markup, />Square</);
+  assert.match(markup, />Full</);
+  assert.match(markup, /aria-pressed="true">Full/);
+});
+
+test("WidgetThemeEditor open state no longer renders modal header or cancel button", () => {
   const markup = renderWithTheme(
     React.createElement(WidgetThemeEditor, {
       mode: "premium",
@@ -76,7 +100,22 @@ test("WidgetThemeEditor open state no longer renders modal header or action butt
   assert.doesNotMatch(markup, /<h2/);
   assert.doesNotMatch(markup, /aria-label="Close color theme editor"/);
   assert.doesNotMatch(markup, />Cancel</);
-  assert.doesNotMatch(markup, />Save</);
+});
+
+test("WidgetThemeEditor detail step renders a confirm button for color changes", () => {
+  const markup = renderWithTheme(
+    React.createElement(WidgetThemeEditor, {
+      mode: "premium",
+      purchaseUrl: DEFAULT_WIDGET_PURCHASE_URL,
+      initialOpen: true,
+      initialActiveColorKey: "color1",
+    })
+  );
+
+  assert.match(markup, /data-theme-editor-confirm-color="true"/);
+  assert.match(markup, /aria-label="Apply"/);
+  assert.match(markup, /text-green-600/);
+  assert.doesNotMatch(markup, />Apply</);
 });
 
 test("WidgetThemeEditor detail step places back button and mode controls above the picker", () => {
@@ -90,6 +129,7 @@ test("WidgetThemeEditor detail step places back button and mode controls above t
   );
 
   assert.match(markup, /aria-label="Back to color list"/);
+  assert.match(markup, /text-red-600/);
   assert.match(markup, />HEX</);
   assert.match(markup, />RGBA</);
   assert.match(markup, /h-9 w-9 shrink-0/);
@@ -110,7 +150,7 @@ test("WidgetThemeEditor open state renders a widget-scoped overlay and anchored 
   assert.match(markup, /data-theme-editor-panel="true"/);
   assert.match(markup, /bottom-1/);
   assert.match(markup, /right-1/);
-  assert.match(markup, /h-\[146px\] w-\[180px\]/);
+  assert.match(markup, /h-\[238px\] w-\[190px\]/);
   assert.match(markup, /max-width:calc\(100% - 8px\)/);
   assert.match(markup, /max-height:calc\(100% - 8px\)/);
 });
@@ -156,7 +196,7 @@ test("renderWidget uses the freemium editor path when access is denied", () => {
     )
   );
 
-  assert.match(markup, /aria-label="Customize widget colors"/);
+  assert.match(markup, /aria-label="Open widget settings"/);
   assert.doesNotMatch(markup, /href="https:\/\/example\.com\/purchase"/);
 });
 
@@ -185,5 +225,5 @@ test("Calendar threads access granted into the premium editor path", () => {
   );
 
   assert.doesNotMatch(markup, /href="https:\/\/atomicskills\.academy\/widgets-notion\/"/);
-  assert.match(markup, /Customize widget colors/);
+  assert.match(markup, /Open widget settings/);
 });

@@ -14,12 +14,14 @@ export const DaysRemaining = ({
   allowThemeEditor = true,
   showBranding,
   purchaseUrl = DEFAULT_WIDGET_PURCHASE_URL,
+  onLayoutChange,
 }: {
   layout?: WidgetLayout;
   accessGranted?: boolean;
   allowThemeEditor?: boolean;
   showBranding?: boolean;
   purchaseUrl?: string;
+  onLayoutChange?: (layout: WidgetLayout) => void;
 }) => {
   const [showPop, setShowPop] = useState(false);
   const [targetDate, setTargetDate] = useState<Date>();
@@ -88,6 +90,7 @@ export const DaysRemaining = ({
       allowThemeEditor={allowThemeEditor}
       showBranding={showBranding}
       purchaseUrl={purchaseUrl}
+      onLayoutChange={onLayoutChange}
       onPopTrigger={(event: React.MouseEvent) => {
         event.preventDefault();
         if (!showPop) {

@@ -9,13 +9,19 @@ import {
   type WidgetAccessState,
 } from "../lib/widget-access-api.js";
 import { getWidgetFromPathname } from "../lib/widget-route.js";
-import { resolveAppView } from "../lib/view-config.js";
+import {
+  buildWidgetLayoutCookie,
+  resolveAppView,
+  resolveWidgetLayoutFromCookie,
+  type WidgetLayout,
+} from "../lib/view-config.js";
 
 export function WidgetPage() {
   const location = useLocation();
   const view = resolveAppView(location.search, undefined, location.pathname);
   const widget = getWidgetFromPathname(location.pathname);
   const [access, setAccess] = useState<WidgetAccessState | null>(null);
+  const [layout, setLayout] = useState<WidgetLayout>("square");
 
   useEffect(() => {
     let cancelled = false;
@@ -36,6 +42,14 @@ export function WidgetPage() {
     }).then((nextAccess) => {
       if (!cancelled) {
         setAccess(nextAccess);
+        setLayout(
+          typeof document === "undefined"
+            ? "square"
+            : resolveWidgetLayoutFromCookie(
+                document.cookie,
+                nextAccess.accessGranted,
+              ),
+        );
       }
     });
 
@@ -52,11 +66,20 @@ export function WidgetPage() {
     );
   }
 
+  const updateLayout = (nextLayout: WidgetLayout) => {
+    if (!access.accessGranted) {
+      return;
+    }
+
+    setLayout(nextLayout);
+    document.cookie = buildWidgetLayoutCookie(nextLayout);
+  };
+
   return (
     <WidgetThemeProvider>
       <div
         className={
-          view.kind === "widget" && view.layout === "square"
+          view.kind === "widget" && layout === "square"
             ? "flex h-screen w-screen items-center justify-center p-4"
             : "h-screen w-screen"
         }
@@ -69,9 +92,10 @@ export function WidgetPage() {
         ) : (
           renderWidget({
             widget: view.widget,
-            layout: view.layout,
+            layout,
             accessGranted: access.accessGranted,
             purchaseUrl: access.purchaseUrl,
+            onLayoutChange: updateLayout,
           })
         )}
       </div>

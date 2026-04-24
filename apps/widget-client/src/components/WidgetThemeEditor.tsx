@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Lock, Palette } from "lucide-react";
+import { ArrowLeft, Check, Lock, Settings } from "lucide-react";
 import { RgbaColor, RgbaColorPicker } from "react-colorful";
 import { cn } from "../lib/utils.js";
 import { useWidgetTheme } from "../hook/useWidgetTheme.js";
@@ -8,6 +8,7 @@ import {
   DEFAULT_WIDGET_PURCHASE_URL,
   type ThemeEditorMode,
 } from "../lib/widget-access.js";
+import type { WidgetLayout } from "../lib/view-config.js";
 import {
   formatRgbaString,
   formatThemeInputValue,
@@ -47,11 +48,6 @@ const ThemeColorField = ({
           <div className="text-[10px] uppercase tracking-[0.16em] text-black/42">
             {label}
           </div>
-          {isLockedVariant && (
-            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-black/8 bg-white/80 text-black/55 shadow-[0_1px_2px_rgba(0,0,0,0.08)]">
-              <Lock size={10} />
-            </span>
-          )}
         </div>
         <div className="mt-[5px] truncate text-[14px] font-semibold leading-none text-notion-black">
           {formatThemeInputValue(colorValue, "hex")}
@@ -65,6 +61,14 @@ const ThemeColorField = ({
           className="absolute inset-[3px] rounded-[8px] border border-black/6"
           style={{ background: formatRgbaString(rgba) }}
         ></span>
+        {isLockedVariant && (
+          <span
+            data-theme-editor-swatch-lock="true"
+            className="absolute -right-1 -top-1 inline-flex h-5 w-5 items-center justify-center rounded-full border border-black/8 bg-white text-black/65 shadow-[0_1px_3px_rgba(0,0,0,0.18)]"
+          >
+            <Lock size={10} color="red" />
+          </span>
+        )}
       </span>
     </>
   );
@@ -106,6 +110,110 @@ const ThemeColorField = ({
   );
 };
 
+const LayoutControl = ({
+  layout,
+  canEdit,
+  onLayoutChange,
+  purchaseUrl,
+  lockLabel,
+  squareLabel,
+  fullLabel,
+  label,
+}: {
+  layout: WidgetLayout;
+  canEdit: boolean;
+  onLayoutChange?: (layout: WidgetLayout) => void;
+  purchaseUrl: string;
+  lockLabel: string;
+  squareLabel: string;
+  fullLabel: string;
+  label: string;
+}) => {
+  const content = (
+    <>
+      <div className="flex items-center justify-between gap-[8px]">
+        <div className="text-[10px] uppercase tracking-[0.16em] text-black/42">
+          {label}
+        </div>
+        {!canEdit && (
+          <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-black/8 bg-white text-black/65 shadow-[0_1px_3px_rgba(0,0,0,0.12)]">
+            <Lock size={10} color="red" />
+          </span>
+        )}
+      </div>
+      <div className="mt-[8px] grid grid-cols-2 gap-[4px] rounded-[8px] border border-black/10 bg-white/90 p-[2px]">
+        {(["square", "full"] as const).map((value) => {
+          const isActive = layout === value;
+          const text = value === "square" ? squareLabel : fullLabel;
+          const optionClassName = cn(
+            "flex h-8 items-center justify-center rounded-[6px] px-[8px] text-xs font-semibold transition",
+            isActive
+              ? "bg-notion-black text-white"
+              : "text-notion-black/70 hover:bg-black/5",
+          );
+
+          if (!canEdit) {
+            return (
+              <span
+                key={value}
+                className={optionClassName}
+                aria-pressed={isActive}
+              >
+                {text}
+              </span>
+            );
+          }
+
+          return (
+            <button
+              key={value}
+              type="button"
+              className={optionClassName}
+              aria-pressed={isActive}
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                if (canEdit) {
+                  onLayoutChange?.(value);
+                }
+              }}
+            >
+              {text}
+            </button>
+          );
+        })}
+      </div>
+    </>
+  );
+
+  const className =
+    "block rounded-[10px] border border-black/10 bg-white/92 px-[10px] py-[9px] text-left transition hover:border-black/20";
+
+  if (!canEdit) {
+    return (
+      <a
+        data-layout-control="locked"
+        href={purchaseUrl}
+        target="_blank"
+        rel="noreferrer"
+        aria-label={lockLabel}
+        className={className}
+        onClick={(event) => {
+          event.stopPropagation();
+        }}
+      >
+        {content}
+      </a>
+    );
+  }
+
+  return (
+    <div data-layout-control="editable" className={className}>
+      {content}
+    </div>
+  );
+};
+
 export const WidgetThemeEditor = ({
   mode,
   purchaseUrl = DEFAULT_WIDGET_PURCHASE_URL,
@@ -113,6 +221,8 @@ export const WidgetThemeEditor = ({
   paletteButtonClassName,
   initialOpen = false,
   initialActiveColorKey = null,
+  layout = "square",
+  onLayoutChange,
 }: {
   mode: ThemeEditorMode;
   purchaseUrl?: string;
@@ -120,11 +230,16 @@ export const WidgetThemeEditor = ({
   paletteButtonClassName?: string;
   initialOpen?: boolean;
   initialActiveColorKey?: ThemeColorKey | null;
+  layout?: WidgetLayout;
+  onLayoutChange?: (layout: WidgetLayout) => void;
 }) => {
   const { theme, saveTheme } = useWidgetTheme();
   const [isOpen, setIsOpen] = useState(initialOpen);
   const [activeColorKey, setActiveColorKey] = useState<ThemeColorKey | null>(
     initialActiveColorKey,
+  );
+  const [originalColorDraft, setOriginalColorDraft] = useState<string | null>(
+    initialActiveColorKey == null ? null : theme[initialActiveColorKey],
   );
   const [inputMode, setInputMode] = useState<ThemeInputMode>("hex");
   const [inputDraft, setInputDraft] = useState(
@@ -189,6 +304,7 @@ export const WidgetThemeEditor = ({
   const isLocked = mode === "locked";
   const isFreemium = mode === "freemium";
   const canEditColors = mode === "premium";
+  const showLayoutControl = isFreemium || onLayoutChange != null;
   const showDetailStep = canEditColors && activeColorKey != null;
 
   const updateThemeColor = (nextColor: string) => {
@@ -196,6 +312,32 @@ export const WidgetThemeEditor = ({
       ...theme,
       [resolvedActiveColorKey]: nextColor,
     });
+  };
+
+  const beginColorEdit = (colorKey: ThemeColorKey) => {
+    setOriginalColorDraft(theme[colorKey]);
+    setActiveColorKey(colorKey);
+  };
+
+  const revertColorEdit = () => {
+    if (activeColorKey != null && originalColorDraft != null) {
+      saveTheme({
+        ...theme,
+        [activeColorKey]: originalColorDraft,
+      });
+    }
+
+    setActiveColorKey(null);
+    setOriginalColorDraft(null);
+    setInputMode("hex");
+    setInputDraft(formatThemeInputValue(theme.color1, "hex"));
+  };
+
+  const confirmColorEdit = () => {
+    setActiveColorKey(null);
+    setOriginalColorDraft(null);
+    setInputMode("hex");
+    setInputDraft(formatThemeInputValue(theme.color1, "hex"));
   };
 
   const updateActiveColorFromRgba = (value: RgbaColor) => {
@@ -215,20 +357,31 @@ export const WidgetThemeEditor = ({
   };
 
   const closeEditor = () => {
+    if (activeColorKey != null && originalColorDraft != null) {
+      saveTheme({
+        ...theme,
+        [activeColorKey]: originalColorDraft,
+      });
+    }
+
     setActiveColorKey(null);
+    setOriginalColorDraft(null);
     setInputMode("hex");
     setInputDraft(formatThemeInputValue(theme.color1, "hex"));
     setIsOpen(false);
   };
 
-  const paletteContents = (
+  const settingsContents = (
     <>
       <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-notion-black backdrop-blur">
-        <Palette size={14} />
+        <Settings size={14} />
       </span>
-      {isLocked && (
-        <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-white text-notion-black shadow-[0_1px_3px_rgba(0,0,0,0.2)]">
-          <Lock size={9} />
+      {(isLocked || isFreemium) && (
+        <span
+          data-theme-editor-settings-lock="true"
+          className="absolute right-[-2px] top-[-2px] grid h-[17px] w-[17px] place-items-center rounded-full bg-white text-notion-black shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
+        >
+          <Lock size={9} className="block" color="red" />
         </span>
       )}
     </>
@@ -259,7 +412,7 @@ export const WidgetThemeEditor = ({
               event.stopPropagation();
             }}
           >
-            {paletteContents}
+            {settingsContents}
           </a>
         ) : (
           <button
@@ -275,7 +428,7 @@ export const WidgetThemeEditor = ({
               setIsOpen(true);
             }}
           >
-            {paletteContents}
+            {settingsContents}
           </button>
         )}
       </div>
@@ -295,7 +448,7 @@ export const WidgetThemeEditor = ({
             className={cn(
               "absolute bottom-1 right-1 origin-bottom-right overflow-hidden rounded-[12px] bg-white/98 p-[8px] text-notion-black shadow-[0_20px_60px_rgba(0,0,0,0.25)] ring-1 ring-black/10 animate-in fade-in zoom-in-95 slide-in-from-bottom-1 slide-in-from-right-1 duration-200 transition-[width,height,opacity,transform] ease-out",
               !showDetailStep
-                ? "h-[170px] w-[180px] scale-100 opacity-100"
+                ? "h-[264px] w-[190px] scale-100 opacity-100"
                 : "h-[308px] w-[224px] scale-100 opacity-100",
             )}
             style={{
@@ -309,10 +462,22 @@ export const WidgetThemeEditor = ({
           >
             {!showDetailStep ? (
               <div className="grid h-full content-start gap-[8px] transition-opacity duration-150">
+                {showLayoutControl && (
+                  <LayoutControl
+                    layout={layout}
+                    canEdit={canEditColors && onLayoutChange != null}
+                    onLayoutChange={onLayoutChange}
+                    purchaseUrl={purchaseUrl}
+                    lockLabel={translations.themeEditor.unlockAriaLabel}
+                    label={translations.themeEditor.layout}
+                    squareLabel={translations.themeEditor.layoutSquare}
+                    fullLabel={translations.themeEditor.layoutFull}
+                  />
+                )}
                 <ThemeColorField
                   label={translations.themeEditor.color1}
                   colorValue={theme.color1}
-                  onActivate={() => setActiveColorKey("color1")}
+                  onActivate={() => beginColorEdit("color1")}
                   variant={isFreemium ? "locked" : "editable"}
                   purchaseUrl={isFreemium ? purchaseUrl : undefined}
                   lockLabel={translations.themeEditor.unlockAriaLabel}
@@ -320,7 +485,7 @@ export const WidgetThemeEditor = ({
                 <ThemeColorField
                   label={translations.themeEditor.color2}
                   colorValue={theme.color2}
-                  onActivate={() => setActiveColorKey("color2")}
+                  onActivate={() => beginColorEdit("color2")}
                   variant={isFreemium ? "locked" : "editable"}
                   purchaseUrl={isFreemium ? purchaseUrl : undefined}
                   lockLabel={translations.themeEditor.unlockAriaLabel}
@@ -331,9 +496,9 @@ export const WidgetThemeEditor = ({
                 <div className="flex items-center gap-[4px]">
                   <button
                     type="button"
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] border border-black/10 text-black/65 transition hover:border-black/20"
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] border border-red-200 bg-red-50 text-red-600 transition hover:border-red-300 hover:bg-red-100"
                     aria-label={translations.themeEditor.backAriaLabel}
-                    onClick={() => setActiveColorKey(null)}
+                    onClick={revertColorEdit}
                   >
                     <ArrowLeft size={16} />
                   </button>
@@ -365,6 +530,15 @@ export const WidgetThemeEditor = ({
                       </button>
                     </div>
                   </div>
+                  <button
+                    data-theme-editor-confirm-color="true"
+                    type="button"
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] border border-green-200 bg-green-50 text-green-600 transition hover:border-green-300 hover:bg-green-100"
+                    aria-label={translations.themeEditor.save}
+                    onClick={confirmColorEdit}
+                  >
+                    <Check size={16} />
+                  </button>
                 </div>
 
                 <label className="grid gap-[2px]">

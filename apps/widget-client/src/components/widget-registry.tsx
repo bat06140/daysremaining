@@ -23,12 +23,14 @@ export const renderWidget = ({
   accessGranted = false,
   allowThemeEditor = true,
   purchaseUrl = DEFAULT_WIDGET_PURCHASE_URL,
+  onLayoutChange,
 }: {
   widget: WidgetKey;
   layout: WidgetLayout;
   accessGranted?: boolean;
   allowThemeEditor?: boolean;
   purchaseUrl?: string;
+  onLayoutChange?: (layout: WidgetLayout) => void;
 }) => {
   switch (widget) {
     case "calendar":
@@ -38,6 +40,7 @@ export const renderWidget = ({
           accessGranted={accessGranted}
           allowThemeEditor={allowThemeEditor}
           purchaseUrl={purchaseUrl}
+          onLayoutChange={onLayoutChange}
         />
       );
     case "daysRemaining":
@@ -47,6 +50,7 @@ export const renderWidget = ({
           accessGranted={accessGranted}
           allowThemeEditor={allowThemeEditor}
           purchaseUrl={purchaseUrl}
+          onLayoutChange={onLayoutChange}
         />
       );
     case "clock":
@@ -56,6 +60,7 @@ export const renderWidget = ({
           accessGranted={accessGranted}
           allowThemeEditor={allowThemeEditor}
           purchaseUrl={purchaseUrl}
+          onLayoutChange={onLayoutChange}
         />
       );
     default:
@@ -65,6 +70,7 @@ export const renderWidget = ({
           accessGranted={accessGranted}
           allowThemeEditor={allowThemeEditor}
           purchaseUrl={purchaseUrl}
+          onLayoutChange={onLayoutChange}
         />
       );
   }

@@ -48,6 +48,7 @@ type Props = {
   children: string | JSX.Element | JSX.Element[];
   layout?: WidgetLayout;
   purchaseUrl?: string;
+  onLayoutChange?: (layout: WidgetLayout) => void;
 };
 
 export const CenteredPopover = ({
@@ -62,6 +63,7 @@ export const CenteredPopover = ({
   children,
   layout = "square",
   purchaseUrl = DEFAULT_WIDGET_PURCHASE_URL,
+  onLayoutChange,
 }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { theme } = useWidgetTheme();
@@ -101,6 +103,8 @@ export const CenteredPopover = ({
         mode={editorMode}
         purchaseUrl={purchaseUrl}
         suspendHoverReveal={showPop}
+        layout={layout}
+        onLayoutChange={onLayoutChange}
       />
       <div className="flex h-full w-full flex-col gap-[2px]">
         <div
