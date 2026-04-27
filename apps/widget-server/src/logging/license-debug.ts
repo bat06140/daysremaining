@@ -38,13 +38,7 @@ export function logStartupDiagnostics({
     [
       "[license-debug] startup",
       `port=${port}`,
-      `DB_HOST=${process.env.DB_HOST ? "set" : "missing"}`,
-      `DB_PORT=${process.env.DB_PORT ? "set" : "missing"}`,
-      `DB_USER=${process.env.DB_USER ? "set" : "missing"}`,
-      `DB_PASSWORD=${process.env.DB_PASSWORD ? "set" : "missing"}`,
-      `DB_NAME=${process.env.DB_NAME ? "set" : "missing"}`,
-      `LMFWC_SECRET=${process.env.LMFWC_SECRET ? "set" : "missing"}`,
-      `LMFWC_DEFUSE=${process.env.LMFWC_DEFUSE ? "set" : "missing"}`,
+      `GUMROAD_PRODUCT_ID=${process.env.GUMROAD_PRODUCT_ID ? "set" : "missing"}`,
       `WIDGET_TEMPLATE_PATH=${templatePath ? "set" : "missing"}`,
       `WIDGET_STATIC_DIR=${staticDir ? "set" : "missing"}`,
     ].join(" ")

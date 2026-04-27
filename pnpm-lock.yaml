@@ -202,9 +202,6 @@ importers:
       express:
         specifier: ^5.2.1
         version: 5.2.1
-      mysql2:
-        specifier: ^3.22.2
-        version: 3.22.2(@types/node@20.14.2)
       node-cache:
         specifier: ^5.1.2
         version: 5.1.2
