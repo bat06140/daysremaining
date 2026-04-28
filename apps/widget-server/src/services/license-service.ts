@@ -32,6 +32,7 @@ export type LicenseServiceOptions = {
   debugLicenses?: boolean;
   logger?: DebugLogger;
   productId?: string;
+  productIds?: string[];
 };
 
 function grantAccess(): LicenseAccessResult {
@@ -70,18 +71,27 @@ const defaultVerifyLicense: VerifyGumroadLicense = async (productId, licenseKey)
 };
 
 export function createLicenseService({
-  cacheTtlSeconds = Number(process.env.CACHE_TTL_SECONDS ?? 3600),
+  cacheTtlSeconds = Number(process.env.CACHE_TTL_SECONDS ?? 86400),
   verifyLicense = defaultVerifyLicense,
   now = () => new Date(),
   debugLicenses = isLicenseDebugEnabled(),
   logger,
   productId = process.env.GUMROAD_PRODUCT_ID,
+  productIds = [],
 }: LicenseServiceOptions = {}) {
   const cache = new NodeCache({
     stdTTL: cacheTtlSeconds,
     useClones: false,
   });
   const debugLogger = createDebugLogger(logger);
+
+  const allProductIds = [...productIds];
+  if (productId && !allProductIds.includes(productId)) {
+    allProductIds.push(productId);
+  }
+  if (process.env.GUMROAD_BUNDLE_PRODUCT_ID && !allProductIds.includes(process.env.GUMROAD_BUNDLE_PRODUCT_ID)) {
+    allProductIds.push(process.env.GUMROAD_BUNDLE_PRODUCT_ID);
+  }
 
   async function checkAccess(key: string | undefined): Promise<LicenseAccessResult> {
     const normalizedKey = normalizeKey(key);
@@ -96,7 +106,7 @@ export function createLicenseService({
       return denyAccess("Licence manquante");
     }
 
-    if (!productId) {
+    if (allProductIds.length === 0) {
       if (debugLicenses) {
         debugLogger.error(
           `[license-debug] access denied license=${licenseFingerprint} reason="GUMROAD_PRODUCT_ID manquant"`
@@ -119,48 +129,55 @@ export function createLicenseService({
       }
     }
 
-    let result: LicenseAccessResult;
+    let result: LicenseAccessResult = denyAccess("Licence introuvable ou invalide");
     let expiresAt: Date | undefined;
+    let apiError = false;
 
-    try {
-      if (debugLicenses) {
-        debugLogger.info(
-          `[license-debug] verify start license=${licenseFingerprint}`
-        );
-      }
-      
-      const data = await verifyLicense(productId, normalizedKey);
+    for (const pId of allProductIds) {
+      try {
+        if (debugLicenses) {
+          debugLogger.info(
+            `[license-debug] verify start license=${licenseFingerprint} productId=${pId}`
+          );
+        }
+        
+        const data = await verifyLicense(pId, normalizedKey);
 
-      if (!data.success) {
-        result = denyAccess("Licence introuvable ou invalide");
-      } else if (data.purchase?.refunded) {
-        result = denyAccess("Licence remboursée");
-      } else if (data.purchase?.chargebacked || data.purchase?.disputed) {
-        result = denyAccess("Licence contestée");
-      } else {
-        const currentTime = now();
-        if (data.purchase?.subscription_ended_at && new Date(data.purchase.subscription_ended_at) <= currentTime) {
-          result = denyAccess("Abonnement terminé");
-        } else if (data.purchase?.subscription_cancelled_at && new Date(data.purchase.subscription_cancelled_at) <= currentTime) {
-          result = denyAccess("Abonnement annulé");
-        } else if (data.purchase?.subscription_failed_at && new Date(data.purchase.subscription_failed_at) <= currentTime) {
-          result = denyAccess("Échec du paiement de l'abonnement");
+        if (!data.success) {
+          result = denyAccess("Licence introuvable ou invalide");
+        } else if (data.purchase?.refunded) {
+          result = denyAccess("Licence remboursée");
+        } else if (data.purchase?.chargebacked || data.purchase?.disputed) {
+          result = denyAccess("Licence contestée");
         } else {
-          result = grantAccess();
-          if (data.purchase?.subscription_ended_at) {
-             expiresAt = new Date(data.purchase.subscription_ended_at);
+          const currentTime = now();
+          if (data.purchase?.subscription_ended_at && new Date(data.purchase.subscription_ended_at) <= currentTime) {
+            result = denyAccess("Abonnement terminé");
+          } else if (data.purchase?.subscription_cancelled_at && new Date(data.purchase.subscription_cancelled_at) <= currentTime) {
+            result = denyAccess("Abonnement annulé");
+          } else if (data.purchase?.subscription_failed_at && new Date(data.purchase.subscription_failed_at) <= currentTime) {
+            result = denyAccess("Échec du paiement de l'abonnement");
+          } else {
+            result = grantAccess();
+            if (data.purchase?.subscription_ended_at) {
+               expiresAt = new Date(data.purchase.subscription_ended_at);
+            }
+            break; // Stop checking, we found a valid license
           }
         }
+      } catch (error) {
+        if (debugLicenses) {
+          const message = error instanceof Error ? error.message : "unknown";
+          debugLogger.error(
+            `[license-debug] verify failed license=${licenseFingerprint} productId=${pId} error="${message}"`
+          );
+        }
+        apiError = true;
       }
-    } catch (error) {
-      if (debugLicenses) {
-        const message = error instanceof Error ? error.message : "unknown";
-        debugLogger.error(
-          `[license-debug] verify failed license=${licenseFingerprint} error="${message}"`
-        );
-      }
+    }
+
+    if (!result.access && apiError) {
       result = denyAccess("Service indisponible");
-      return result;
     }
 
     const entry: CacheEntry = { result, expiresAt };
