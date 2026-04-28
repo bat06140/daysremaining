@@ -1,0 +1,57 @@
+---
+# .cpanel.yml — Déploiement automatique du widget-server Node.js
+#
+# Fonctionnement :
+#   1. cPanel clone le dépôt git dans un dossier temporaire
+#   2. Ces tâches s'exécutent depuis la racine du clone
+#   3. pnpm est installé à la volée si absent
+#   4. Le build complet (client + server) se fait sur le serveur
+#   5. `pnpm deploy` crée un répertoire standalone avec les deps de prod
+#      et résout automatiquement les dépendances workspace (@repo/shared, etc.)
+#
+# Arborescence produite dans DEPLOYPATH :
+#   ~/notion-widgets/
+#     dist/            ← widget-server compilé (TypeScript → JS)
+#     client/          ← widget-client buildé (fichiers statiques Vite)
+#     node_modules/    ← dépendances de production uniquement (résolu par pnpm deploy)
+#     package.json     ← manifest de prod
+#     tmp/             ← redémarrage Passenger
+#     .env             ← à créer manuellement (voir .env.example)
+#
+# Variables d'environnement requises dans .env sur le serveur :
+#   PORT=3000
+#   WIDGET_TEMPLATE_PATH=./client/index.html
+#   WIDGET_STATIC_DIR=./client
+#
+# Note : le widget-server Express sert à la fois l'API et les fichiers
+# statiques du client — un seul processus, un seul port.
+
+deployment:
+  tasks:
+    # ── Variables ──────────────────────────────────────────────────────────
+    - export DEPLOYPATH=$HOME/repositories/notion-widgets 
+
+    # ── Installer pnpm si absent (cPanel n'a pas pnpm par défaut) ──────────
+    - npm install --global pnpm@10 --silent
+
+    # ── Installer toutes les dépendances (dev inclus, pour les builds) ─────
+    - pnpm install --frozen-lockfile
+
+    # ── Build du widget-client (Vite → fichiers statiques) ─────────────────
+    - pnpm --filter @repo/widget-client run build
+
+    # ── Build du widget-server (TypeScript → dist/) ────────────────────────
+    - pnpm --filter @repo/widget-server run build
+
+    # ── Déploiement standalone via pnpm deploy ─────────────────────────────
+    # Crée DEPLOYPATH avec : dist/, node_modules/ (prod only), package.json
+    # Résout automatiquement les workspace deps (@repo/shared inclus)
+    - pnpm --filter @repo/widget-server deploy --prod $DEPLOYPATH
+
+    # ── Copie des assets statiques du client dans le répertoire de déploiement
+    - mkdir -p $DEPLOYPATH/client
+    - cp --archive --update apps/widget-client/dist/. $DEPLOYPATH/client/
+
+    # ── Redémarrage de l'application via Passenger ─────────────────────────
+    - mkdir -p $DEPLOYPATH/tmp
+    - touch $DEPLOYPATH/tmp/restart.txt
