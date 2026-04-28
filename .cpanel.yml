@@ -1,7 +1,7 @@
 ---
 deployment:
   tasks:
-    - pnpm install --frozen-lockfile
-    - pnpm build
+    - $HOME/bin/bin/pnpm install --frozen-lockfile
+    - $HOME/bin/bin/pnpm build
     - mkdir -p $HOME/repositories/notion-widgets/apps/widget-server/dist/tmp
     - touch $HOME/repositories/notion-widgets/apps/widget-server/dist/tmp/restart.txt
