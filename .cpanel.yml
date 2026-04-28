@@ -7,7 +7,7 @@
 #   apps/widget-client/dist/   ← client Vite
 #
 # Configuration Node.js dans cPanel (à faire une seule fois manuellement) :
-#   Application root    : /home/<user>/repositories/notion-widgets/apps/widget-server
+#   Application root    : /home/mupe3654/repositories/notion-widgets/apps/widget-server
 #   Application startup : dist/index.js
 #   Node.js version     : 20.x
 #   .env                : à créer manuellement (voir apps/widget-server/.env.example)
@@ -23,6 +23,8 @@ deployment:
     # ── Build client (Vite) + server (tsc) orchestrés par turbo ───────────
     - pnpm build
 
-    # ── Redémarrage Passenger (chemin relatif à l'application root cPanel) ─
-    - mkdir -p apps/widget-server/tmp
-    - touch apps/widget-server/tmp/restart.txt
+    # ── Redémarrage Passenger ──────────────────────────────────────────────
+    # Passenger surveille tmp/restart.txt dans l'Application Root cPanel.
+    # Chemin absolu pour éviter toute ambiguïté sur le CWD d'exécution.
+    - mkdir -p $HOME/repositories/notion-widgets/apps/widget-server/tmp
+    - touch $HOME/repositories/notion-widgets/apps/widget-server/tmp/restart.txt
