@@ -1,8 +1,8 @@
 ---
 deployment:
   tasks:
-    - npm install --global pnpm@10 --silent
-    - pnpm install --frozen-lockfile
-    - pnpm build
+    - source /home/mupe3654/nodevenv/repositories/notion-widgets/apps/widget-server/dist/22/bin/activate && npm install --global pnpm@10 --silent
+    - source /home/mupe3654/nodevenv/repositories/notion-widgets/apps/widget-server/dist/22/bin/activate && pnpm install --frozen-lockfile
+    - source /home/mupe3654/nodevenv/repositories/notion-widgets/apps/widget-server/dist/22/bin/activate && pnpm build
     - mkdir -p $HOME/repositories/notion-widgets/apps/widget-server/dist/tmp
     - touch $HOME/repositories/notion-widgets/apps/widget-server/dist/tmp/restart.txt
