@@ -4,5 +4,5 @@ deployment:
     - npm install --global pnpm@10 --silent
     - pnpm install --frozen-lockfile
     - pnpm build
-    - mkdir -p $HOME/repositories/notion-widgets/apps/widget-server/tmp
-    - touch $HOME/repositories/notion-widgets/apps/widget-server/tmp/restart.txt
+    - mkdir -p $HOME/repositories/notion-widgets/apps/widget-server/dist/tmp
+    - touch $HOME/repositories/notion-widgets/apps/widget-server/dist/tmp/restart.txt
