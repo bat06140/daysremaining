@@ -68,16 +68,21 @@ jobs:
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 0400 ~/.ssh/id_rsa
 
-      # Le serveur Express sert les fichiers statiques du client via WIDGET_STATIC_DIR.
-      # Les deux dist/ sont necessaires pour que l'app fonctionne.
+      # pnpm deploy cree un dossier standalone avec :
+      #   dist/          <- server compile
+      #   node_modules/  <- prod only, @repo/shared resolu comme copie locale
+      #   package.json
 
-      - name: Deploy server dist
+      - name: Create standalone server package
+        run: pnpm --filter @repo/widget-server deploy --prod --legacy /tmp/widget-server-deploy
+
+      - name: Deploy server (dist + node_modules)
         run: |
           rsync --timeout=60 \
             -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa" \
             -av --delete \
-            apps/widget-server/dist/ \
-            ${{ secrets.CPANEL_USERNAME }}@${{ secrets.CPANEL_SERVER }}:/home/${{ secrets.CPANEL_USERNAME }}/repositories/notion-widgets/apps/widget-server/dist/
+            /tmp/widget-server-deploy/ \
+            ${{ secrets.CPANEL_USERNAME }}@${{ secrets.CPANEL_SERVER }}:/home/${{ secrets.CPANEL_USERNAME }}/repositories/notion-widgets/apps/widget-server/
 
       - name: Deploy client dist (served by Express)
         run: |
