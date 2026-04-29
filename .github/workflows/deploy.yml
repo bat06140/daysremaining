@@ -1,0 +1,107 @@
+name: Build & Deploy widget-server
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/widget-server/**'
+      - 'apps/widget-client/**'
+      - 'packages/shared/**'
+      - '.github/workflows/deploy.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build all packages
+        # turbo orchestre dans l'ordre : @repo/shared -> widget-client + widget-server
+        # Produit :
+        #   apps/widget-server/dist/  <- server TypeScript compile
+        #   apps/widget-client/dist/  <- Vite bundle (servi par Express)
+        run: pnpm build
+
+      - name: Get runner public IP
+        id: ip
+        uses: haythem/public-ip@v1.3
+
+      - name: Remove all whitelisted IPs
+        run: |
+          curl -sm 45 \
+            -H 'Authorization: cpanel ${{ secrets.CPANEL_USERNAME }}:${{ secrets.CPANEL_API_TOKEN }}' \
+            'https://${{ secrets.CPANEL_SERVER }}:2083/execute/SshWhitelist/remove_all'
+
+      - name: Whitelist runner IP
+        run: |
+          curl -sm 45 \
+            -H 'Authorization: cpanel ${{ secrets.CPANEL_USERNAME }}:${{ secrets.CPANEL_API_TOKEN }}' \
+            'https://${{ secrets.CPANEL_SERVER }}:2083/execute/SshWhitelist/add?address=${{ steps.ip.outputs.ipv4 }}&port=22'
+
+      - name: Verify IP is whitelisted
+        run: |
+          curl -sm 45 \
+            -H 'Authorization: cpanel ${{ secrets.CPANEL_USERNAME }}:${{ secrets.CPANEL_API_TOKEN }}' \
+            'https://${{ secrets.CPANEL_SERVER }}:2083/execute/SshWhitelist/list' \
+          | grep '${{ steps.ip.outputs.ipv4 }}'
+
+      - name: Install SSH key
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 0400 ~/.ssh/id_rsa
+
+      # Le serveur Express sert les fichiers statiques du client via WIDGET_STATIC_DIR.
+      # Les deux dist/ sont necessaires pour que l'app fonctionne.
+
+      - name: Deploy server dist
+        run: |
+          rsync --timeout=60 \
+            -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa" \
+            -av --delete \
+            apps/widget-server/dist/ \
+            ${{ secrets.CPANEL_USERNAME }}@${{ secrets.CPANEL_SERVER }}:/home/${{ secrets.CPANEL_USERNAME }}/repositories/notion-widgets/apps/widget-server/dist/
+
+      - name: Deploy client dist (served by Express)
+        run: |
+          rsync --timeout=60 \
+            -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa" \
+            -av --delete \
+            apps/widget-client/dist/ \
+            ${{ secrets.CPANEL_USERNAME }}@${{ secrets.CPANEL_SERVER }}:/home/${{ secrets.CPANEL_USERNAME }}/repositories/notion-widgets/apps/widget-client/dist/
+
+      - name: Restart Passenger
+        # tmp/restart.txt est relatif a l'Application Root cPanel,
+        # soit ~/repositories/notion-widgets/apps/widget-server/
+        # PAS dans dist/ (erreur frequente)
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa \
+            ${{ secrets.CPANEL_USERNAME }}@${{ secrets.CPANEL_SERVER }} \
+            "mkdir -p ~/repositories/notion-widgets/apps/widget-server/tmp \
+             && touch ~/repositories/notion-widgets/apps/widget-server/tmp/restart.txt"
+
+      - name: Cleanup SSH key
+        if: always()
+        run: rm -fr ~/.ssh
+
+      - name: Remove runner IP from whitelist
+        if: always()
+        run: |
+          curl -sm 45 \
+            -H 'Authorization: cpanel ${{ secrets.CPANEL_USERNAME }}:${{ secrets.CPANEL_API_TOKEN }}' \
+            'https://${{ secrets.CPANEL_SERVER }}:2083/execute/SshWhitelist/remove?address=${{ steps.ip.outputs.ipv4 }}'
+
