@@ -82,7 +82,7 @@ jobs:
           cd /tmp/widget-server-deploy
           mv node_modules node_modules_symlinks
           mkdir node_modules
-          cp -rL node_modules_symlinks/* node_modules/
+          cp -rL node_modules_symlinks/. node_modules/
           rm -rf node_modules_symlinks
           
           # On supprime le cache caché .pnpm qui ne sert plus a rien (gain de poids massif)
