@@ -80,7 +80,7 @@ jobs:
         run: |
           rsync --timeout=60 \
             -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa" \
-            -av --delete \
+            -avL --delete \
             /tmp/widget-server-deploy/ \
             ${{ secrets.CPANEL_USERNAME }}@${{ secrets.CPANEL_SERVER }}:/home/${{ secrets.CPANEL_USERNAME }}/repositories/notion-widgets/apps/widget-server/
 
