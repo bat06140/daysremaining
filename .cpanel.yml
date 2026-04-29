@@ -1,7 +1,0 @@
----
-deployment:
-  tasks:
-    - source /home/mupe3654/nodevenv/repositories/notion-widgets/dist/22/bin/activate && NODE_OPTIONS="--max-old-space-size=256" pnpm install --frozen-lockfile --filter @repo/widget-server
-    - source /home/mupe3654/nodevenv/repositories/notion-widgets/dist/22/bin/activate && NODE_OPTIONS="--max-old-space-size=256" pnpm build --filter @repo/widget-server
-    - mkdir -p $HOME/repositories/notion-widgets/apps/widget-server/dist/tmp
-    - touch $HOME/repositories/notion-widgets/apps/widget-server/dist/tmp/restart.txt
