@@ -91,6 +91,11 @@ jobs:
 
       - name: Deploy server (dist + node_modules)
         run: |
+          # Creation du repertoire cible s'il n'existe plus
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa \
+            ${{ secrets.CPANEL_USERNAME }}@${{ secrets.CPANEL_SERVER }} \
+            "mkdir -p ~/repositories/notion-widgets/apps/widget-server/"
+
           rsync --timeout=60 \
             -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa" \
             -av --delete \
@@ -99,6 +104,11 @@ jobs:
 
       - name: Deploy client dist (served by Express)
         run: |
+          # Creation du repertoire cible client
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa \
+            ${{ secrets.CPANEL_USERNAME }}@${{ secrets.CPANEL_SERVER }} \
+            "mkdir -p ~/repositories/notion-widgets/apps/widget-client/dist/"
+
           rsync --timeout=60 \
             -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa" \
             -av --delete \
