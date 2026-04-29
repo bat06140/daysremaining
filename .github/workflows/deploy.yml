@@ -12,17 +12,20 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      # Force les actions tierces (checkout, pnpm/action-setup) a utiliser Node 24
+      # au lieu de Node 20 (deprecie depuis 2026-09-16)
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10
+        # Pas de 'version' ici : la version est lue depuis packageManager dans package.json
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: 'pnpm'
 
       - name: Install dependencies
