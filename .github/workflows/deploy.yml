@@ -68,49 +68,30 @@ jobs:
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 0400 ~/.ssh/id_rsa
 
-      # pnpm deploy cree un dossier standalone avec :
-      #   dist/          <- server compile
-      #   node_modules/  <- prod only, @repo/shared resolu comme copie locale
-      #   package.json
-
-      - name: Create standalone server package
-        run: pnpm --filter @repo/widget-server deploy --prod /tmp/widget-server-deploy
-
-      - name: Deploy server (dist + node_modules)
+      - name: Sync source code to server
         run: |
-          # Creation du repertoire cible s'il n'existe plus
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa \
-            ${{ secrets.CPANEL_USERNAME }}@${{ secrets.CPANEL_SERVER }} \
-            "mkdir -p ~/repositories/notion-widgets/apps/widget-server/"
-
-          rsync --timeout=60 \
-            -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa" \
-            -avL --delete \
-            /tmp/widget-server-deploy/ \
-            ${{ secrets.CPANEL_USERNAME }}@${{ secrets.CPANEL_SERVER }}:/home/${{ secrets.CPANEL_USERNAME }}/repositories/notion-widgets/apps/widget-server/
-
-      - name: Deploy client dist (served by Express)
-        run: |
-          # Creation du repertoire cible client
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa \
-            ${{ secrets.CPANEL_USERNAME }}@${{ secrets.CPANEL_SERVER }} \
-            "mkdir -p ~/repositories/notion-widgets/apps/widget-client/dist/"
-
+          # On synchronise tout le code source (sauf node_modules et dist)
           rsync --timeout=60 \
             -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa" \
             -av --delete \
-            apps/widget-client/dist/ \
-            ${{ secrets.CPANEL_USERNAME }}@${{ secrets.CPANEL_SERVER }}:/home/${{ secrets.CPANEL_USERNAME }}/repositories/notion-widgets/apps/widget-client/dist/
+            --exclude "node_modules" \
+            --exclude "dist" \
+            --exclude ".git" \
+            --exclude ".github" \
+            --exclude ".turbo" \
+            ./ \
+            ${{ secrets.CPANEL_USERNAME }}@${{ secrets.CPANEL_SERVER }}:/home/${{ secrets.CPANEL_USERNAME }}/repositories/notion-widgets/
 
-      - name: Restart Passenger
-        # tmp/restart.txt est relatif a l'Application Root cPanel,
-        # soit ~/repositories/notion-widgets/apps/widget-server/
-        # PAS dans dist/ (erreur frequente)
+      - name: Install, Build and Restart on server
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa \
             ${{ secrets.CPANEL_USERNAME }}@${{ secrets.CPANEL_SERVER }} \
-            "mkdir -p ~/repositories/notion-widgets/apps/widget-server/tmp \
-             && touch ~/repositories/notion-widgets/apps/widget-server/tmp/restart.txt"
+            "cd ~/repositories/notion-widgets && \
+             npm install -g pnpm@10 && \
+             pnpm install --frozen-lockfile && \
+             pnpm build && \
+             mkdir -p apps/widget-server/tmp && \
+             touch apps/widget-server/tmp/restart.txt"
 
       - name: Cleanup SSH key
         if: always()
