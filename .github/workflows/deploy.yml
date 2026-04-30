@@ -89,6 +89,9 @@ jobs:
             "cd ~/repositories/notion-widgets && \
              pnpm install --frozen-lockfile && \
              pnpm build && \
+             mkdir -p node_modules/@repo && \
+             ln -sfn ../../packages/shared node_modules/@repo/shared && \
+             rm -rf apps/widget-server/node_modules && \
              mkdir -p apps/widget-server/tmp && \
              touch apps/widget-server/tmp/restart.txt"
 
