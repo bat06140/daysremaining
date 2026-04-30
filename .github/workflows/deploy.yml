@@ -74,20 +74,7 @@ jobs:
       #   package.json
 
       - name: Create standalone server package
-        run: |
-          pnpm --filter @repo/widget-server deploy --prod --legacy /tmp/widget-server-deploy
-          
-          # Aplatit completement le node_modules pour supprimer tout symlink (cPanel Symlink Protection)
-          # On deplace node_modules, on le recrée en copiant le contenu dereferencé (-L)
-          cd /tmp/widget-server-deploy
-          mv node_modules node_modules_symlinks
-          mkdir node_modules
-          cp -rL node_modules_symlinks/. node_modules/
-          rm -rf node_modules_symlinks
-          
-          # On supprime le cache caché .pnpm qui ne sert plus a rien (gain de poids massif)
-          rm -rf node_modules/.pnpm
-          rm -f node_modules/.pnpm-workspace-state.json
+        run: pnpm --filter @repo/widget-server deploy --prod --legacy /tmp/widget-server-deploy
 
       - name: Deploy server (dist + node_modules)
         run: |
@@ -98,7 +85,7 @@ jobs:
 
           rsync --timeout=60 \
             -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa" \
-            -av --delete \
+            -avL --delete \
             /tmp/widget-server-deploy/ \
             ${{ secrets.CPANEL_USERNAME }}@${{ secrets.CPANEL_SERVER }}:/home/${{ secrets.CPANEL_USERNAME }}/repositories/notion-widgets/apps/widget-server/
 
