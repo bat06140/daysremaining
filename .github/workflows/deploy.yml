@@ -87,7 +87,6 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa \
             ${{ secrets.CPANEL_USERNAME }}@${{ secrets.CPANEL_SERVER }} \
             "cd ~/repositories/notion-widgets && \
-             npm install -g pnpm@10 && \
              pnpm install --frozen-lockfile && \
              pnpm build && \
              mkdir -p apps/widget-server/tmp && \
