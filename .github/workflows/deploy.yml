@@ -74,7 +74,7 @@ jobs:
       #   package.json
 
       - name: Create standalone server package
-        run: pnpm --filter @repo/widget-server deploy --prod --legacy /tmp/widget-server-deploy
+        run: pnpm --filter @repo/widget-server deploy --prod /tmp/widget-server-deploy
 
       - name: Deploy server (dist + node_modules)
         run: |
