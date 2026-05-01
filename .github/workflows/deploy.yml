@@ -7,36 +7,36 @@ on:
       - 'apps/widget-server/**'
       - 'apps/widget-client/**'
       - 'packages/shared/**'
+      - 'package.json'
+      - 'package-lock.json'
       - '.github/workflows/deploy.yml'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      # Force les actions tierces (checkout, pnpm/action-setup) a utiliser Node 24
+      # Force les actions tierces a utiliser Node 24
       # au lieu de Node 20 (deprecie depuis 2026-09-16)
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
-        # Pas de 'version' ici : la version est lue depuis packageManager dans package.json
-
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: 'pnpm'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Build all packages
         # turbo orchestre dans l'ordre : @repo/shared -> widget-client + widget-server
         # Produit :
         #   apps/widget-server/dist/  <- server TypeScript compile
         #   apps/widget-client/dist/  <- Vite bundle (servi par Express)
-        run: pnpm build
+        run: npm run build
 
       - name: Get runner public IP
         id: ip
@@ -87,10 +87,8 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa \
             ${{ secrets.CPANEL_USERNAME }}@${{ secrets.CPANEL_SERVER }} \
             "cd ~/repositories/notion-widgets && \
-             pnpm install --frozen-lockfile && \
-             pnpm build && \
-             mkdir -p node_modules/@repo && \
-             ln -sfn ../../packages/shared node_modules/@repo/shared && \
+             npm ci && \
+             npm run build && \
              rm -rf apps/widget-server/node_modules && \
              mkdir -p apps/widget-server/tmp && \
              touch apps/widget-server/tmp/restart.txt"
@@ -105,4 +103,3 @@ jobs:
           curl -sm 45 \
             -H 'Authorization: cpanel ${{ secrets.CPANEL_USERNAME }}:${{ secrets.CPANEL_API_TOKEN }}' \
             'https://${{ secrets.CPANEL_SERVER }}:2083/execute/SshWhitelist/remove?address=${{ steps.ip.outputs.ipv4 }}'
-
