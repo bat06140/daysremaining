@@ -14,7 +14,7 @@
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@radix-ui/react-popover": "^1.0.7",
-    "@repo/shared": "workspace:*",
+    "@repo/shared": "file:../../packages/shared",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "lucide-react": "^0.395.0",

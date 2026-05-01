@@ -150,7 +150,7 @@ test("WidgetThemeEditor open state renders a widget-scoped overlay and anchored 
   assert.match(markup, /data-theme-editor-panel="true"/);
   assert.match(markup, /bottom-1/);
   assert.match(markup, /right-1/);
-  assert.match(markup, /h-\[238px\] w-\[190px\]/);
+  assert.match(markup, /h-\[258px\] w-\[190px\]/);
   assert.match(markup, /max-width:calc\(100% - 8px\)/);
   assert.match(markup, /max-height:calc\(100% - 8px\)/);
 });

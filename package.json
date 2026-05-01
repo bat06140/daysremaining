@@ -2,8 +2,12 @@
   "name": "daysremaining",
   "private": true,
   "version": "0.0.0",
-  "packageManager": "pnpm@10.11.1",
+  "packageManager": "npm@11.4.1",
   "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "babelMacros": {
     "twin": {
       "preset": "emotion"
@@ -11,16 +15,17 @@
   },
   "scripts": {
     "dev": "turbo run dev",
-    "dev:calendar": "VITE_COMPONENT=calendar pnpm --filter @repo/widget-client run dev",
-    "dev:days-remaining": "VITE_COMPONENT=daysRemaining pnpm --filter @repo/widget-client run dev",
-    "dev:clock": "VITE_COMPONENT=clock pnpm --filter @repo/widget-client run dev",
+    "dev:calendar": "VITE_COMPONENT=calendar npm run dev --workspace=@repo/widget-client",
+    "dev:days-remaining": "VITE_COMPONENT=daysRemaining npm run dev --workspace=@repo/widget-client",
+    "dev:clock": "VITE_COMPONENT=clock npm run dev --workspace=@repo/widget-client",
     "build": "turbo run build",
-    "build:calendar": "VITE_COMPONENT=calendar pnpm --filter @repo/widget-client run build",
-    "build:days-remaining": "VITE_COMPONENT=daysRemaining pnpm --filter @repo/widget-client run build",
+    "build:calendar": "VITE_COMPONENT=calendar npm run build --workspace=@repo/widget-client",
+    "build:days-remaining": "VITE_COMPONENT=daysRemaining npm run build --workspace=@repo/widget-client",
+    "start": "npm run start --workspace=@repo/widget-server",
     "test": "turbo run test",
-    "test:server": "pnpm --filter @repo/widget-server run test",
+    "test:server": "npm run test --workspace=@repo/widget-server",
     "lint": "turbo run lint",
-    "preview": "pnpm --filter @repo/widget-client run preview"
+    "preview": "npm run preview --workspace=@repo/widget-client"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",

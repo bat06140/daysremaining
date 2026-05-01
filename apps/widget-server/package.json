@@ -13,7 +13,7 @@
     "test": "rm -rf .test-dist && tsc -p tests/tsconfig.json && node --test .test-dist/tests/**/*.test.js"
   },
   "dependencies": {
-    "@repo/shared": "workspace:*",
+    "@repo/shared": "file:../../packages/shared",
     "dotenv": "^16.6.1",
     "express": "^5.2.1",
     "node-cache": "^5.1.2"

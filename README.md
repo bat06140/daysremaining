@@ -1,6 +1,6 @@
 # Days Remaining Monorepo
 
-This repository now uses a workspace-only `pnpm` + `turbo` layout.
+This repository now uses a workspace-only `npm` + `turbo` layout.
 
 Packages:
 
@@ -10,16 +10,17 @@ Packages:
 
 Useful commands from the repository root:
 
-- `pnpm build`
-- `pnpm test`
-- `pnpm dev`
-- `pnpm dev:calendar`
-- `pnpm dev:days-remaining`
-- `pnpm dev:clock`
+- `npm run build`
+- `npm test`
+- `npm run dev`
+- `npm run dev:calendar`
+- `npm run dev:days-remaining`
+- `npm run dev:clock`
+- `npm start`
 
 Development workflow:
 
-- `pnpm dev` starts the React Router frontend on `http://localhost:3000`
+- `npm run dev` starts the React Router frontend on `http://localhost:3000`
 - the backend API runs internally on `http://localhost:3001`
 - frontend widget routes are handled by React Router
 - `/api/*` is proxied automatically to the backend in development
