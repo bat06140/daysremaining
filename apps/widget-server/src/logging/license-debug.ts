@@ -30,7 +30,7 @@ export function logStartupDiagnostics({
   staticDir,
 }: {
   logger: DebugLogger;
-  port: number;
+  port: number | string;
   templatePath?: string;
   staticDir?: string;
 }) {

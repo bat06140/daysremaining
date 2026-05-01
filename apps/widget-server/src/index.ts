@@ -54,8 +54,11 @@ export function resolveWidgetAssetPaths({
 
 export function resolveServerPort(
   env: Record<string, string | undefined> = process.env
-) {
-  return Number(env.PORT ?? 3000);
+): string | number {
+  const portStr = env.PORT;
+  if (!portStr) return 3000;
+  const parsedPort = Number(portStr);
+  return Number.isNaN(parsedPort) ? portStr : parsedPort;
 }
 
 export async function startServer({
@@ -65,7 +68,7 @@ export async function startServer({
   debugLicenses = isLicenseDebugEnabled(),
   logger,
   ...options
-}: CreateAppOptions & { port?: number } = {}) {
+}: CreateAppOptions & { port?: number | string } = {}) {
   const resolvedAssets = resolveWidgetAssetPaths({ templatePath, staticDir });
   const debugLogger = createDebugLogger(logger);
 
